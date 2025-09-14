@@ -49,6 +49,7 @@ app.get('/api/items', async (req, res) => {
                 i.id, i.name, i.description, i.category,
                 TO_CHAR(i.found_date, 'YYYY-MM-DD') as "foundDate",
                 i.location, i.image_url as "imageUrl", i.status,
+                i.created_at as "createdAt", -- Menambahkan field ini
                 json_build_object(
                     'name', f.name, 'nim', f.nim, 'contact', f.contact, 'photoUrl', f.photo_url
                 ) as finder,

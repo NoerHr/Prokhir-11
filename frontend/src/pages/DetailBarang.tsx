@@ -23,13 +23,21 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({ item, setPage, onCla
     }
     
     const calculateStorageDuration = () => {
-        if (!item.foundDate) return 'N/A';
-        const foundDate = new Date(item.foundDate);
+        if (!item.createdAt) return 'N/A';
+        
+        const startDate = new Date(item.createdAt);
         const endDate = item.claimer ? new Date(item.claimer.claimedDate) : new Date();
-        const diffTime = Math.abs(endDate.getTime() - foundDate.getTime());
-        if (isNaN(diffTime)) return 'Tanggal tidak valid';
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return `${diffDays} hari`;
+        
+        if (isNaN(startDate.getTime())) return 'Waktu tidak valid';
+
+        let diff = Math.abs(endDate.getTime() - startDate.getTime());
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        diff -= days * (1000 * 60 * 60 * 24);
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        
+        return `${days} hari ${hours} jam`;
     };
 
     return (

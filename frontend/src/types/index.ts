@@ -23,4 +23,5 @@ export type Item = {
     category: 'Elektronik' | 'Dokumen' | 'Barang Pribadi' | 'Lainnya';
     finder: Finder;
     claimer?: Claimer | null;
+    createdAt: string;
 };
