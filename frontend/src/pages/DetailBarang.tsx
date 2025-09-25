@@ -1,6 +1,5 @@
-@ -0,0 +1,81 @@
 import React, { useState } from 'react';
-import { Item, Claimer } from '../types.ts';
+import { Item, Claimer } from '../types';
 import { TrashIcon } from '../components/Icons.tsx';
 import { ClaimModal } from '../components/ClaimModal.tsx';
 
