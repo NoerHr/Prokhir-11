@@ -9,6 +9,8 @@ import { DaftarBarang } from './pages/DaftarBarang';
 import { TambahBarang } from './pages/TambahBarang';
 import { DetailBarang } from './pages/DetailBarang';
 import { Statistik } from './pages/Statistik';
+import { DaftarKategori } from './pages/DaftarKategori';
+import { TambahKategori } from './pages/TambahKategori';
 
 function App() {
     const [items, setItems] = useState<Item[]>([]);
@@ -89,8 +91,10 @@ function App() {
             <main className="flex-1 ml-64">
                 <Routes>
                     <Route path="/" element={<Beranda items={items} />} />
-                    <Route path="/daftar" element={<DaftarBarang items={items} setSelectedItem={setSelectedItem} />} />
-                    <Route path="/tambah" element={<TambahBarang onAddItem={handleAddItem} />} />
+                    <Route path="/daftar-barang" element={<DaftarBarang items={items} setSelectedItem={setSelectedItem} />} />
+                    <Route path="/daftar-kategori" element={<DaftarKategori />} />
+                    <Route path="/tambah-barang" element={<TambahBarang onAddItem={handleAddItem} />} />
+                    <Route path="/tambah-kategori" element={<TambahKategori />} />
                     <Route path="/statistik" element={<Statistik items={items} />} />
                     <Route path="/detail" element={<DetailBarang item={selectedItem} onClaim={handleClaimItem} onDelete={handleDeleteItem} />} />
                 </Routes>
