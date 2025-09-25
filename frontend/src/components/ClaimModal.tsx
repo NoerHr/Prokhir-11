@@ -1,4 +1,3 @@
-@ -0,0 +1,40 @@
 import React, { useState } from 'react';
 import { Item, Claimer } from '../types';
 

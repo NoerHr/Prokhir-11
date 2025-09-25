@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Item } from '../types.ts';
+import { Item } from '../types';
 import { SearchIcon } from '../components/Icons.tsx';
 
 interface DaftarBarangProps {
@@ -26,7 +26,7 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({ items, setPage, setS
                     <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transform hover:-translate-y-1 transition-transform duration-200" onClick={() => handleCardClick(item)}>
                         <div className="w-full h-48 bg-gray-200"><img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x300/cccccc/333333?text=Error'; }}/></div>
                         <div className="p-4"><h3 className="text-lg font-bold text-gray-800 truncate">{item.name}</h3><p className="text-sm text-gray-500 mt-1">Ditemukan: {item.foundDate}</p><p className="text-sm text-gray-500">Lokasi: {item.location}</p></div>
-                        <span className={'absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium '${item.status === 'Ditemukan' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}}>{item.status}</span>
+                        <span className={`absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium ${item.status === 'Ditemukan' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{item.status}</span>
                     </div>
                 ))}
             </div>
