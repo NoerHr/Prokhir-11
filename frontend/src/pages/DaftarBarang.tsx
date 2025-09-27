@@ -69,7 +69,7 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {filteredItems.map((item) => (
           <Link
-            to="/detail"
+            to="/admin/detail"
             key={item.id}
             className="relative block bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transform hover:-translate-y-1 transition-transform duration-200"
             onClick={() => setSelectedItem(item)}

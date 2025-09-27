@@ -27,7 +27,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
       <div className="p-8">
         <h1 className="text-4xl font-bold">Barang tidak ditemukan</h1>
         <button
-          onClick={() => navigate("/daftar-barang")}
+          onClick={() => navigate("/admin/daftar-barang")}
           className="text-blue-600 hover:underline mt-4"
         >
           Kembali ke Daftar Barang
@@ -56,7 +56,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
         <div>
           <span
             className="text-blue-600 cursor-pointer hover:underline"
-            onClick={() => navigate("/daftar-barang")}
+            onClick={() => navigate("/admin/daftar-barang")}
           >
             Daftar Barang
           </span>

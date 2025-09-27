@@ -1,20 +1,18 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { HomeIcon, ListIcon, PlusSquareIcon, } from "./Icons.tsx";
+import { HomeIcon, ListIcon, PlusSquareIcon, LogOutIcon } from "./Icons.tsx";
 
-// Props setPage dan currentPage sudah tidak dibutuhkan lagi
 interface SidebarProps {
-  [key: string]: { name: string; icon: React.FC; path: string };
+  onLogout: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = () => {
+export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navItems = [
-    { name: "Beranda", icon: <HomeIcon />, path: "/" },
-    { name: "Daftar Barang", icon: <ListIcon />, path: "/daftar-barang" },
-    { name: "Daftar Kategori", icon: <ListIcon />, path: "/daftar-kategori" },
-    { name: "Tambah Barang", icon: <PlusSquareIcon />, path: "/tambah-barang" },
-    { name: "Tambah Kategori", icon: <ListIcon />, path: "/tambah-kategori" },
-    // { name: "Statistik", icon: <BarChartIcon />, path: "/statistik" },
+    { name: "Beranda", icon: <HomeIcon />, path: "/admin/beranda" },
+    { name: "Daftar Barang", icon: <ListIcon />, path: "/admin/daftar-barang" },
+    { name: "Daftar Kategori", icon: <ListIcon />, path: "/admin/daftar-kategori" },
+    { name: "Tambah Barang", icon: <PlusSquareIcon />, path: "/admin/tambah-barang" },
+    { name: "Tambah Kategori", icon: <ListIcon />, path: "/admin/tambah-kategori" },
   ];
 
   return (
@@ -28,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <li key={item.name}>
               <NavLink
                 to={item.path}
-                // NavLink secara otomatis tahu halaman mana yang aktif
                 className={({ isActive }) =>
                   `flex items-center space-x-3 p-3 rounded-lg text-gray-600 font-medium transition-colors duration-200 ${
                     isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
@@ -42,6 +39,15 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           ))}
         </ul>
       </nav>
+      <div className="pt-4 border-t border-gray-200">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center space-x-3 text-left p-3 rounded-lg text-gray-600 font-medium hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
+        >
+          <LogOutIcon />
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
   );
 };

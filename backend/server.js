@@ -1,12 +1,15 @@
 require("dotenv").config();
 const express = require("express");
-const { dataBarang } = require("./data/barang");
-const app = express();
-const port = process.env.PORT;
 const cors = require("cors");
-const { dataKategoriBarang } = require("./data/kategoriBarang");
+const { dataBarang } = require("./data/barang.js");
+const { dataKategoriBarang } = require("./data/kategoriBarang.js");
+const { userData } = require("./data/user.js");
+
+const app = express();
+const port = process.env.PORT || 2006;
 
 app.use(cors());
+app.use(express.json());
 
 app.get("/get-barang", (req, res) => {
   res.status(200).json({
@@ -15,11 +18,11 @@ app.get("/get-barang", (req, res) => {
   });
 });
 
-app.get("/get-kategori-barang", (req, res) => { 
+app.get("/get-kategori-barang", (req, res) => {
   res.status(200).json({
     message: "Berhasil Mendapatkan data kategori barang",
-    data: dataKategoriBarang
-  })
+    data: dataKategoriBarang,
+  });
 });
 
 app.post("/login", (req, res) => {
@@ -39,6 +42,12 @@ app.post("/login", (req, res) => {
 app.post("/create-barang", (req, res) => {
   res.status(201).json({
     message: "Berhasil Menambahkan data barang",
+  });
+});
+
+app.post("/create-kategori", (req, res) => {
+  res.status(201).json({
+    message: "Berhasil Menambahkan data kategori",
   });
 });
 

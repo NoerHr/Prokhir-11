@@ -1,10 +1,54 @@
+import { useState, useRef } from "react";
+import axios from "axios";
+
 export const TambahKategori = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const kategoriData = {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        status: formData.get("status") === "true",
+      };
+
+      console.log("Sending data:", kategoriData);
+
+      const response = await axios.post(
+        "http://localhost:2006/create-kategori",
+        kategoriData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      console.log("Response:", response);
+
+      if (response.status === 201) {
+        alert("Kategori baru berhasil ditambahkan!");
+        if (formRef.current) {
+          formRef.current.reset();
+        }
+      }
+    } catch (error) {
+      console.error("Error details:", error);
+      alert("Terjadi kesalahan saat menambahkan kategori.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-4xl font-bold text-gray-800 mb-8">
         Tambah Data Kategori Barang
       </h1>
-      <form className="max-w-4xl space-y-8">
+      <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl space-y-8">
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-2xl font-bold text-gray-800 mb-6">
             1. Informasi Kategori
@@ -63,10 +107,10 @@ export const TambahKategori = () => {
         <div className="text-right">
           <button
             type="submit"
-            // disabled={}
+            disabled={isLoading}
             className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400"
           >
-            {"Simpan Data Kategori"}
+            {isLoading ? "Menyimpan..." : "Simpan Data Kategori"}
           </button>
         </div>
       </form>

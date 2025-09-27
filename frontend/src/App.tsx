@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, Outlet } from "react-router-dom";
 import axios from "axios";
 
 import { Item, Claimer } from "./types";
@@ -8,9 +8,19 @@ import { Beranda } from "./pages/Beranda";
 import { DaftarBarang } from "./pages/DaftarBarang";
 import { TambahBarang } from "./pages/TambahBarang";
 import { DetailBarang } from "./pages/DetailBarang";
-// import { Statistik } from "./pages/Statistik";
 import { TambahKategori } from "./pages/TambahKategori";
 import { DaftarKategori } from "./pages/DaftarKategori";
+import { Login } from "./pages/Login";
+import { DashboardUser } from "./pages/DashboardUser";
+
+// Komponen untuk Melindungi Rute Admin
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const isAuthenticated = !!localStorage.getItem("authToken");
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   const [items, setItems] = useState<Item[]>([]);
@@ -18,6 +28,9 @@ function App() {
     const saved = localStorage.getItem("selectedItem");
     return saved ? JSON.parse(saved) : null;
   });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() =>
+    !!localStorage.getItem("authToken")
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,9 +43,9 @@ function App() {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get("http://192.168.1.4:2006/get-barang");
+      const response = await axios.get("http://localhost:2006/get-barang");
       console.log(response.data?.data?.items);
-      setItems(response?.data?.data?.items);
+      setItems(response?.data?.data?.items || []);
     } catch (error) {
       console.log(error);
       alert(
@@ -51,7 +64,7 @@ function App() {
       if (!updatedItem) {
         setSelectedItem(null);
         localStorage.removeItem("selectedItem");
-        navigate("/daftar");
+        navigate("/admin/daftar-barang");
       } else if (JSON.stringify(updatedItem) !== JSON.stringify(selectedItem)) {
         setSelectedItem(updatedItem);
       }
@@ -94,7 +107,7 @@ function App() {
       try {
         await axios.delete(`http://localhost:3001/api/items/${itemId}`);
         alert("Barang berhasil dihapus.");
-        navigate("/daftar");
+        navigate("/admin/daftar-barang");
         await fetchItems();
       } catch (error) {
         console.log(error);
@@ -103,38 +116,73 @@ function App() {
     }
   };
 
-  return (
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    navigate("/admin/beranda");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setIsAuthenticated(false);
+    navigate("/login");
+  };
+
+  // Komponen Layout Admin
+  const AdminLayout = () => (
     <div className="flex bg-gray-50 min-h-screen font-sans">
-      <Sidebar />
+      <Sidebar onLogout={handleLogout} />
       <main className="flex-1 ml-64">
-        <Routes>
-          <Route path="/" element={<Beranda items={items} />} />
-          <Route
-            path="/daftar-barang"
-            element={
-              <DaftarBarang items={items} setSelectedItem={setSelectedItem} />
-            }
-          />
-          <Route path="/daftar-kategori" element={<DaftarKategori />} />
-          <Route
-            path="/tambah-barang"
-            element={<TambahBarang onAddItem={handleAddItem} />}
-          />
-          <Route path="/tambah-kategori" element={<TambahKategori />} />
-          {/* <Route path="/statistik" element={<Statistik items={items} />} /> */}
-          <Route
-            path="/detail"
-            element={
-              <DetailBarang
-                item={selectedItem}
-                onClaim={handleClaimItem}
-                onDelete={handleDeleteItem}
-              />
-            }
-          />
-        </Routes>
+        <Outlet />
       </main>
     </div>
+  );
+
+  return (
+    <Routes>
+      {/* Rute Publik */}
+      <Route path="/" element={<DashboardUser items={items} />} />
+      <Route
+        path="/login"
+        element={<Login onLoginSuccess={handleLoginSuccess} />}
+      />
+
+      {/* Rute Admin dengan Layout */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="beranda" element={<Beranda items={items} />} />
+        <Route
+          path="daftar-barang"
+          element={
+            <DaftarBarang
+              items={items}
+              setSelectedItem={setSelectedItem}
+            />
+          }
+        />
+        <Route path="daftar-kategori" element={<DaftarKategori />} />
+        <Route
+          path="tambah-barang"
+          element={<TambahBarang onAddItem={handleAddItem} />}
+        />
+        <Route path="tambah-kategori" element={<TambahKategori />} />
+        <Route
+          path="detail"
+          element={
+            <DetailBarang
+              item={selectedItem}
+              onClaim={handleClaimItem}
+              onDelete={handleDeleteItem}
+            />
+          }
+        />
+      </Route>
+    </Routes>
   );
 }
 

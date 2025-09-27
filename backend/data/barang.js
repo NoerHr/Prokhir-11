@@ -1,5 +1,6 @@
-import { dataKategoriBarang } from "./kategoriBarang.js";
-export const dataBarang = {
+const { dataKategoriBarang } = require("./kategoriBarang.js");
+
+const dataBarang = {
   items: [
     {
       id: 1,
@@ -59,21 +60,23 @@ export const dataBarang = {
       },
       foundDate: "2025-09-08",
       status: "Diambil",
-      imageUrl: "https://placehold.co/300x300/f3f4f6/313442?text=Buku",
-      location: "Ruang Kelas 101",
+      imageUrl: "https://placehold.co/300x300/f3f4f6/313442?text=Dokumen",
+      location: "Ruang Kelas 102",
       createdAt: "2025-09-08T14:00:00Z",
       finder: {
-        name: "Joko Susilo",
-        nim: "220543210",
-        contact: "08567891234",
-        photoUrl: "https://placehold.co/100x100/A8A29E/FFFFFF?text=Joko",
+        name: "Ahmad Fauzi",
+        nim: "220543211",
+        contact: "08567891235",
+        photoUrl: "https://placehold.co/100x100/A8A29E/FFFFFF?text=Ahmad",
       },
       claimer: {
-        name: "Maria Selena",
-        nim: "220112233",
-        claimedDate: "2025-09-09",
-        photoUrl: "https://placehold.co/100x100/E7E5E4/FFFFFF?text=Maria",
+        name: "Siti Nurhaliza",
+        nim: "220112234",
+        claimedDate: "2025-09-10",
+        photoUrl: "https://placehold.co/100x100/E7E5E4/FFFFFF?text=Siti",
       },
     },
   ],
 };
+
+module.exports = { dataBarang };
