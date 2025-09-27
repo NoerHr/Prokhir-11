@@ -29,7 +29,9 @@ export const DaftarKategori = () => {
           <tbody>
             <tr className={"border-b border-gray-200"}>
               <td className="p-4 text-gray-700 font-medium">Alat tulis</td>
-              <td className="p-4 text-gray-600">Alat tulis dan perlengkapannya</td>
+              <td className="p-4 text-gray-600">
+                Alat tulis dan perlengkapannya
+              </td>
 
               <td className="p-4">
                 <span
