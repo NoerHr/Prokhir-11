@@ -12,6 +12,11 @@ export type Claimer = {
   photoUrl: string;
 };
 
+export type categoryItem = {
+  id: number;
+  name: string;
+};
+
 export type Item = {
   id: number;
   name: string;
@@ -20,7 +25,7 @@ export type Item = {
   status: "Ditemukan" | "Diambil";
   imageUrl: string;
   location: string;
-  category: "Elektronik" | "Dokumen" | "Barang Pribadi" | "Lainnya";
+  kategoriBarang: categoryItem;
   finder: Finder;
   claimer?: Claimer | null;
   createdAt: string;

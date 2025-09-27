@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { HomeIcon, ListIcon, PlusSquareIcon, BarChartIcon } from "./Icons.tsx";
+import { HomeIcon, ListIcon, PlusSquareIcon, } from "./Icons.tsx";
 
 // Props setPage dan currentPage sudah tidak dibutuhkan lagi
 interface SidebarProps {
@@ -14,7 +14,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
     { name: "Daftar Kategori", icon: <ListIcon />, path: "/daftar-kategori" },
     { name: "Tambah Barang", icon: <PlusSquareIcon />, path: "/tambah-barang" },
     { name: "Tambah Kategori", icon: <ListIcon />, path: "/tambah-kategori" },
-    { name: "Statistik", icon: <BarChartIcon />, path: "/statistik" },
+    // { name: "Statistik", icon: <BarChartIcon />, path: "/statistik" },
   ];
 
   return (
