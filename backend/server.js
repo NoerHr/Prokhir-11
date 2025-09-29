@@ -51,6 +51,24 @@ app.post("/create-kategori", (req, res) => {
   });
 });
 
+app.post("/claim-barang/:id", (req, res) => {
+  res.status(201).json({
+    message: "  Berhasil Mengklaim barang",
+  });
+});
+
+app.delete("/delete-barang/:id", (req, res) => {
+  res.status(200).json({
+    message: "Berhasil Menghapus data barang",
+  });
+});
+
+app.delete("/delete-kategori-barang/:id", (req, res) => {
+  res.status(200).json({
+    message: "Berhasil Menghapus data kategori barang",
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
 });
