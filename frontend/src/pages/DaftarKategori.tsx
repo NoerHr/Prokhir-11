@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { SearchIcon } from "../components/Icons";
+import { SearchIcon, TrashIcon } from "../components/Icons";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Category {
   id: number;
@@ -10,6 +12,7 @@ interface Category {
 export const DaftarKategori = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -18,6 +21,7 @@ export const DaftarKategori = () => {
           "http://localhost:2006/get-kategori-barang"
         );
         setCategories(response.data?.data || []);
+        console.log(response.data?.data);
       } catch (error) {
         console.log(error);
         alert("Gagal memuat data kategori dari server.");
@@ -30,6 +34,24 @@ export const DaftarKategori = () => {
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteCategory = (categoryId: number) => async () => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:2006/delete-kategori-barang/${categoryId}`
+      );
+      if (
+        window.confirm(
+          "Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat diurungkan."
+        )
+      ) {
+        toast.success(response.data?.message);
+        return navigate("/admin/daftar-kategori");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="p-8">
@@ -53,9 +75,16 @@ export const DaftarKategori = () => {
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-4 text-gray-600 font-semibold">ID</th>
-              <th className="p-4 text-gray-600 font-semibold">Nama Kategori</th>
-              <th className="p-4 text-gray-600 font-semibold">Status</th>
+              <th className="p-4 text-gray-600 font-semibold  text-center">
+                ID
+              </th>
+              <th className="p-4 text-gray-600 font-semibold  text-center">
+                Nama Kategori
+              </th>
+              <th className="p-4 text-gray-600 font-semibold  text-center">
+                Status
+              </th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -69,23 +98,30 @@ export const DaftarKategori = () => {
                       : ""
                   }
                 >
-                  <td className="p-4 text-gray-700 font-medium">{category.id}</td>
-                  <td className="p-4 text-gray-700 font-medium">
+                  <td className="p-4 text-gray-700 font-medium text-center">
+                    {category.id}
+                  </td>
+                  <td className="p-4 text-gray-700 font-medium text-center">
                     {category.name}
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 text-center">
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
                       Aktif
                     </span>
+                  </td>
+                  <td className="flex justify-center items-center p-4">
+                    <button
+                      className="flex items-center gap-2 border border-red-500 text-red-500 font-bold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors w-fit"
+                      onClick={handleDeleteCategory(category.id)}
+                    >
+                      <TrashIcon /> Hapus Barang
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={3}
-                  className="text-center p-8 text-gray-500"
-                >
+                <td colSpan={3} className="text-center p-8 text-gray-500">
                   Tidak ada kategori yang ditemukan.
                 </td>
               </tr>

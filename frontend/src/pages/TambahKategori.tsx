@@ -1,9 +1,12 @@
 import { useState, useRef } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const TambahKategori = () => {
   const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,10 +33,11 @@ export const TambahKategori = () => {
       console.log("Response:", response);
 
       if (response.status === 201) {
-        alert("Kategori baru berhasil ditambahkan!");
+        toast.success(response.data.message);
         if (formRef.current) {
           formRef.current.reset();
         }
+        return navigate("/admin/daftar-kategori");
       }
     } catch (error) {
       console.error("Error details:", error);
@@ -48,7 +52,11 @@ export const TambahKategori = () => {
       <h1 className="text-4xl font-bold text-gray-800 mb-8">
         Tambah Data Kategori Barang
       </h1>
-      <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl space-y-8">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="max-w-4xl space-y-8"
+      >
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-2xl font-bold text-gray-800 mb-6">
             1. Informasi Kategori
