@@ -12,14 +12,15 @@ import { TambahKategori } from "./pages/TambahKategori";
 import { DaftarKategori } from "./pages/DaftarKategori";
 import { Login } from "./pages/Login";
 import { DashboardUser } from "./pages/DashboardUser";
+import { toast } from "react-hot-toast";
 
 // Komponen untuk Melindungi Rute Admin
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = !!localStorage.getItem("authToken");
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  return children;
+  return <>{children}</>;
 };
 
 function App() {
@@ -28,8 +29,8 @@ function App() {
     const saved = localStorage.getItem("selectedItem");
     return saved ? JSON.parse(saved) : null;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() =>
-    !!localStorage.getItem("authToken")
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    () => !!localStorage.getItem("authToken")
   );
   const navigate = useNavigate();
 
@@ -85,16 +86,16 @@ function App() {
     formData.append("nim", claimerData.nim);
     formData.append("claimerPhoto", claimerPhoto);
     try {
-      await axios.patch(
-        `http://localhost:3001/api/items/${itemId}/claim`,
+      const response = await axios.post(
+        `http://localhost:2006/claim-barang/${itemId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      alert("Barang berhasil diklaim!");
-      await fetchItems();
+      toast.success(response.data?.message);
+      // await fetchItems();
     } catch (error) {
       console.log(error);
-      alert("Gagal mengklaim barang.");
+      toast.error("Gagal mengklaim barang.");
     }
   };
 
@@ -105,13 +106,15 @@ function App() {
       )
     ) {
       try {
-        await axios.delete(`http://localhost:3001/api/items/${itemId}`);
-        alert("Barang berhasil dihapus.");
-        navigate("/admin/daftar-barang");
-        await fetchItems();
+        const response = await axios.delete(
+          `http://localhost:2006/delete-barang/${itemId}`
+        );
+        toast.success(response.data?.message);
+        return navigate("/admin/daftar-barang");
+        // await fetchItems();
       } catch (error) {
         console.log(error);
-        alert("Gagal menghapus barang.");
+        toast.error("Gagal menghapus barang.");
       }
     }
   };
@@ -128,7 +131,7 @@ function App() {
   };
 
   // Komponen Layout Admin
-  const AdminLayout = () => (
+  const AdminLayout: React.FC = () => (
     <div className="flex bg-gray-50 min-h-screen font-sans">
       <Sidebar onLogout={handleLogout} />
       <main className="flex-1 ml-64">
@@ -159,10 +162,7 @@ function App() {
         <Route
           path="daftar-barang"
           element={
-            <DaftarBarang
-              items={items}
-              setSelectedItem={setSelectedItem}
-            />
+            <DaftarBarang items={items} setSelectedItem={setSelectedItem} />
           }
         />
         <Route path="daftar-kategori" element={<DaftarKategori />} />

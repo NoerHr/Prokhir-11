@@ -10,9 +10,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navItems = [
     { name: "Beranda", icon: <HomeIcon />, path: "/admin/beranda" },
     { name: "Daftar Barang", icon: <ListIcon />, path: "/admin/daftar-barang" },
-    { name: "Daftar Kategori", icon: <ListIcon />, path: "/admin/daftar-kategori" },
-    { name: "Tambah Barang", icon: <PlusSquareIcon />, path: "/admin/tambah-barang" },
-    { name: "Tambah Kategori", icon: <ListIcon />, path: "/admin/tambah-kategori" },
+    {
+      name: "Daftar Kategori",
+      icon: <ListIcon />,
+      path: "/admin/daftar-kategori",
+    },
+    {
+      name: "Tambah Barang",
+      icon: <PlusSquareIcon />,
+      path: "/admin/tambah-barang",
+    },
+    {
+      name: "Tambah Kategori",
+      icon: <PlusSquareIcon />,
+      path: "/admin/tambah-kategori",
+    },
   ];
 
   return (
