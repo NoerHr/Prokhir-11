@@ -2,32 +2,34 @@ import { useState, useEffect } from "react";
 import { SearchIcon, TrashIcon } from "../components/Icons";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { ConfirmModal } from "../components/ConfirmModal";
 
 interface Category {
   id: number;
   name: string;
+  description?: string;
+  status?: boolean;
+  created_at?: string;
 }
 
 export const DaftarKategori = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:2006/get-kategori-barang"
+      );
+      setCategories(response.data?.data || []);
+    } catch (error) {
+      console.log(error);
+      toast.error("Gagal memuat data kategori dari server.");
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:2006/get-kategori-barang"
-        );
-        setCategories(response.data?.data || []);
-        console.log(response.data?.data);
-      } catch (error) {
-        console.log(error);
-        alert("Gagal memuat data kategori dari server.");
-      }
-    };
-
     fetchCategories();
   }, []);
 
@@ -35,21 +37,38 @@ export const DaftarKategori = () => {
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteCategory = (categoryId: number) => async () => {
+  const handleDeleteClick = (categoryId: number) => {
+    setDeleteTarget(categoryId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
     try {
       const response = await axios.delete(
-        `http://localhost:2006/delete-kategori-barang/${categoryId}`
+        `http://localhost:2006/delete-kategori-barang/${deleteTarget}`
       );
-      if (
-        window.confirm(
-          "Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat diurungkan."
-        )
-      ) {
-        toast.success(response.data?.message);
-        return navigate("/admin/daftar-kategori");
-      }
+      toast.success(response.data?.message);
+      await fetchCategories();
     } catch (error) {
       console.log(error);
+      toast.error("Gagal menghapus kategori.");
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
+
+  const handleToggleStatus = async (categoryId: number, currentStatus: boolean) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:2006/update-kategori-status/${categoryId}`,
+        { status: !currentStatus }
+      );
+      toast.success(response.data?.message);
+      await fetchCategories(); // Refresh data
+    } catch (error) {
+      console.log(error);
+      toast.error("Gagal mengubah status kategori.");
     }
   };
 
@@ -75,16 +94,18 @@ export const DaftarKategori = () => {
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-4 text-gray-600 font-semibold  text-center">
-                ID
+              <th className="p-4 text-gray-600 font-semibold text-center w-20">
+                No
               </th>
-              <th className="p-4 text-gray-600 font-semibold  text-center">
+              <th className="p-4 text-gray-600 font-semibold text-center">
                 Nama Kategori
               </th>
-              <th className="p-4 text-gray-600 font-semibold  text-center">
+              <th className="p-4 text-gray-600 font-semibold text-center">
                 Status
               </th>
-              <th></th>
+              <th className="p-4 text-gray-600 font-semibold text-center w-40">
+                Aksi
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -99,29 +120,38 @@ export const DaftarKategori = () => {
                   }
                 >
                   <td className="p-4 text-gray-700 font-medium text-center">
-                    {category.id}
+                    {index + 1}
                   </td>
                   <td className="p-4 text-gray-700 font-medium text-center">
                     {category.name}
                   </td>
                   <td className="p-4 text-center">
-                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
-                      Aktif
-                    </span>
-                  </td>
-                  <td className="flex justify-center items-center p-4">
                     <button
-                      className="flex items-center gap-2 border border-red-500 text-red-500 font-bold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors w-fit"
-                      onClick={handleDeleteCategory(category.id)}
+                      onClick={() => handleToggleStatus(category.id, category.status || false)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors ${
+                        category.status 
+                          ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                          : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                      }`}
                     >
-                      <TrashIcon /> Hapus Barang
+                      {category.status ? "Aktif" : "Non-Aktif"}
                     </button>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex justify-center">
+                      <button
+                        className="flex items-center gap-2 border border-red-500 text-red-500 font-bold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                        onClick={() => handleDeleteClick(category.id)}
+                      >
+                        <TrashIcon /> Hapus
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="text-center p-8 text-gray-500">
+                <td colSpan={4} className="text-center p-8 text-gray-500">
                   Tidak ada kategori yang ditemukan.
                 </td>
               </tr>
@@ -129,6 +159,17 @@ export const DaftarKategori = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="Hapus Kategori?"
+        message="Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat diurungkan."
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+        type="danger"
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Item } from '../types'; // Pastikan path import ini sesuai
+import { formatDateTime } from '../utils/dateUtils';
 
 // Ikon untuk search bar
 const SearchIcon = () => (
@@ -40,7 +41,7 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
         <div className="min-h-screen bg-gray-50 font-sans">
             <header className="bg-white shadow-sm sticky top-0 z-10">
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-gray-800">Lost & Found Kampus</h1>
+                    <h1 className="text-xl font-bold text-gray-800">Lost & Found</h1>
                     <Link 
                         to="/login" 
                         className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
@@ -54,7 +55,7 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
                 
                 <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden mb-12 py-16 px-8 flex flex-col items-center justify-center text-center">
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}></div>
-                    <div className="relative z-10">
+                    <div className="relative">
                         <svg className="h-24 w-24 text-white mx-auto mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                         </svg>
@@ -63,10 +64,7 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
                             Barang Hilang? Kami Bantu Temukan!
                         </h2>
                         <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-                            Platform Lost & Found resmi kampus untuk membantu Anda menemukan barang-barang yang tercecer atau melaporkan barang yang Anda temukan.
-                        </p>
-                        <p className="text-md text-blue-200 mt-4">
-                            Lihat daftar barang yang ditemukan di bawah ini. Jika itu milik Anda, segera hubungi kami melalui admisi!
+                            Platform Lost & Found resmi kampus untuk membantu Anda menemukan barang-barang atau melaporkan barang yang Anda temukan.
                         </p>
                     </div>
                 </section>
@@ -119,8 +117,10 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
                                 </div>
                                 <div className="p-4">
                                     <h3 className="text-lg font-bold text-gray-800 truncate">{item.name}</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Ditemukan: {item.foundDate}</p>
-                                    <p className="text-sm text-gray-500">Lokasi: {item.location}</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                    Ditemukan: {formatDateTime(item.foundDate)}
+                  </p>
+                  <p className="text-sm text-gray-500">Lokasi: {item.location}</p>
                                 </div>
                                 <span className="absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                     {item.status}

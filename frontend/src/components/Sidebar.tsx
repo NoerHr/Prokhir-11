@@ -16,6 +16,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       path: "/admin/daftar-kategori",
     },
     {
+      name: "Daftar Pengajuan",
+      icon: <ListIcon />,
+      path: "/admin/daftar-pengajuan",
+    },
+    {
       name: "Tambah Barang",
       icon: <PlusSquareIcon />,
       path: "/admin/tambah-barang",

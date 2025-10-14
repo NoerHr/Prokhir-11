@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Item, Claimer } from "../types";
 import { TrashIcon } from "../components/Icons.tsx";
 import { ClaimModal } from "../components/ClaimModal.tsx";
+import { ConfirmModal } from "../components/ConfirmModal";
+import { formatDateTime, calculateStorageDuration } from "../utils/dateUtils";
 
 interface DetailBarangProps {
   item: Item | null;
@@ -20,6 +22,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
   onDelete,
 }) => {
   const [isClaimModalOpen, setClaimModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
 
   if (!item) {
@@ -36,18 +39,13 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
     );
   }
 
-  const calculateStorageDuration = () => {
-    if (!item.createdAt) return "N/A";
-    const startDate = new Date(item.createdAt);
-    const endDate = item.claimer
-      ? new Date(item.claimer.claimedDate)
-      : new Date();
-    if (isNaN(startDate.getTime())) return "Waktu tidak valid";
-    let diff = Math.abs(endDate.getTime() - startDate.getTime());
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    diff -= days * (1000 * 60 * 60 * 24);
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    return `${days} hari ${hours} jam`;
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowDeleteConfirm(false);
+    onDelete(item.id);
   };
 
   return (
@@ -64,7 +62,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
           <span className="text-gray-600">Detail</span>
         </div>
         <button
-          onClick={() => onDelete(item.id)}
+          onClick={handleDeleteClick}
           className="flex items-center gap-2 border border-red-500 text-red-500 font-bold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
         >
           <TrashIcon /> Hapus Barang
@@ -84,7 +82,9 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
           <div className="flex-grow">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm text-gray-500">{item.kategoriBarang.name}</p>
+                <p className="text-sm text-gray-500">
+                  {item.kategoriBarang.name}
+                </p>
                 <h1 className="text-4xl font-bold text-gray-800 mb-2">
                   {item.name}
                 </h1>
@@ -104,7 +104,9 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
             <div className="grid grid-cols-2 gap-6 text-sm">
               <div>
                 <p className="text-gray-500">Tanggal Ditemukan</p>
-                <p className="font-semibold">{item.foundDate}</p>
+                <p className="font-semibold">
+                  {formatDateTime(item.foundDate)}
+                </p>
               </div>
               <div>
                 <p className="text-gray-500">Lokasi Ditemukan</p>
@@ -116,7 +118,9 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
               </div>
               <div>
                 <p className="text-gray-500">Lama Tersimpan</p>
-                <p className="font-semibold">{calculateStorageDuration()}</p>
+                <p className="font-semibold">
+                  {calculateStorageDuration(item.foundDate, item.claimer?.claimedDate)}
+                </p>
               </div>
             </div>
             {item.status === "Ditemukan" && (
@@ -127,6 +131,14 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
                 >
                   Tandai Sudah Diambil
                 </button>
+              </div>
+            )}
+
+            {item.status === "Diambil" && (
+              <div className="text-right mt-6">
+                <div className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                  ✓ Barang sudah diambil
+                </div>
               </div>
             )}
           </div>
@@ -167,7 +179,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
                 <p className="font-bold">{item.claimer.name}</p>
                 <p className="text-sm text-gray-600">NIM: {item.claimer.nim}</p>
                 <p className="text-sm text-gray-600">
-                  Tanggal Diambil: {item.claimer.claimedDate}
+                  Tanggal Diambil: {formatDateTime(item.claimer.claimedDate)}
                 </p>
               </div>
             </div>
@@ -183,6 +195,16 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
           onClaim={onClaim}
         />
       )}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Hapus Barang?"
+        message="Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat diurungkan."
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        type="danger"
+      />
     </div>
   );
 };

@@ -30,3 +30,27 @@ export type Item = {
   claimer?: Claimer | null;
   createdAt: string;
 };
+
+export type User = {
+  id: number;
+  name: string;
+  nim: string;
+  email: string;
+  contact: string;
+  role: "admin" | "user";
+};
+
+export type ClaimRequest = {
+  id: number;
+  itemId: number;
+  itemName: string;
+  userId: number;
+  userName: string;
+  userNim: string;
+  alasan: string;
+  buktiUrl: string | null;
+  status: "Pending" | "Approved" | "Rejected";
+  adminNote: string | null;
+  createdAt: string;
+  processedAt?: string;
+};

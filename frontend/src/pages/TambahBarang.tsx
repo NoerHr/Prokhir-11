@@ -25,10 +25,14 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
         const response = await axios.get(
           "http://localhost:2006/get-kategori-barang"
         );
-        setCategories(response.data?.data || []);
+        // Filter hanya kategori yang aktif
+        const activeCategories = (response.data?.data || []).filter(
+          (cat: any) => cat.status === true
+        );
+        setCategories(activeCategories);
       } catch (error) {
         console.log(error);
-        alert("Gagal memuat data kategori dari server.");
+        toast.error("Gagal memuat data kategori dari server.");
       }
     };
     fetchCategories();
@@ -37,14 +41,19 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+
     const formData = new FormData(e.currentTarget);
+
+    // Validasi file upload
     if (!itemPhoto || !finderPhoto) {
-      alert("Harap unggah foto barang dan foto penemu.");
+      toast.error("Harap unggah foto barang dan foto penemu.");
       setIsLoading(false);
       return;
     }
+
     formData.append("itemPhoto", itemPhoto);
     formData.append("finderPhoto", finderPhoto);
+
     try {
       const response = await axios.post(
         "http://localhost:2006/create-barang",
@@ -53,13 +62,17 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
       if (response.status === 201) {
         toast.success(response.data.message);
         onAddItem();
-        return navigate("/admin/daftar-barang");
+        navigate("/admin/daftar-barang");
       }
-    } catch (error) {
-      alert("Terjadi kesalahan saat menambahkan barang.");
+    } catch (error: any) {
+      console.error("Error details:", error.response?.data || error.message);
+      toast.error(
+        error.response?.data?.message || "Terjadi kesalahan saat menambahkan barang."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +102,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 id="nama-barang"
                 required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Contoh: Headphone Sony"
               />
             </div>
             <div>
@@ -125,6 +139,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 required
                 rows={3}
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Jelaskan detail barang yang ditemukan..."
               ></textarea>
             </div>
             <div>
@@ -133,12 +148,18 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
               </label>
               <input
                 type="file"
+                accept="image/*"
                 required
                 onChange={(e) =>
                   e.target.files && setItemPhoto(e.target.files[0])
                 }
                 className="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:bg-blue-50 file:text-blue-700 file:font-semibold file:border-none file:px-4 file:py-2 hover:file:bg-blue-100"
               />
+              {itemPhoto && (
+                <p className="mt-1 text-xs text-green-600">
+                  ✓ {itemPhoto.name} ({(itemPhoto.size / 1024).toFixed(2)} KB)
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -160,6 +181,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 id="nama-penemu"
                 required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Nama lengkap penemu"
               />
             </div>
             <div>
@@ -174,7 +196,9 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 type="text"
                 id="nim-penemu"
                 required
+                pattern="\d{8,}"
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="12345678"
               />
             </div>
             <div>
@@ -182,15 +206,14 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 htmlFor="kontak-penemu"
                 className="block text-sm font-medium text-gray-600 mb-1"
               >
-                Informasi Kontak (WA/Line){" "}
-                <span className="text-red-500">*</span>
+                Informasi Kontak (WA/Line)
               </label>
               <input
                 name="finderContact"
                 type="text"
                 id="kontak-penemu"
-                required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="08123456789"
               />
             </div>
             <div>
@@ -205,10 +228,26 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 type="date"
                 id="tanggal-ditemukan"
                 required
+                max={new Date().toISOString().split("T")[0]}
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
+              <label
+                htmlFor="waktu-ditemukan"
+                className="block text-sm font-medium text-gray-600 mb-1"
+              >
+                Waktu Ditemukan <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="foundTime"
+                type="time"
+                id="waktu-ditemukan"
+                required
+                className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="md:col-span-2">
               <label
                 htmlFor="lokasi-ditemukan"
                 className="block text-sm font-medium text-gray-600 mb-1"
@@ -221,6 +260,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 id="lokasi-ditemukan"
                 required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Contoh: Perpustakaan Lt. 2"
               />
             </div>
             <div>
@@ -229,12 +269,18 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
               </label>
               <input
                 type="file"
+                accept="image/*"
                 required
                 onChange={(e) =>
                   e.target.files && setFinderPhoto(e.target.files[0])
                 }
                 className="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:bg-blue-50 file:text-blue-700 file:font-semibold file:border-none file:px-4 file:py-2 hover:file:bg-blue-100"
               />
+              {finderPhoto && (
+                <p className="mt-1 text-xs text-green-600">
+                  ✓ {finderPhoto.name} ({(finderPhoto.size / 1024).toFixed(2)} KB)
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -244,7 +290,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
             disabled={isLoading}
             className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400"
           >
-            {isLoading ? "Menyimpan..." : "Simpan Data Barang"}
+            {isLoading ? "Mengupload & Menyimpan..." : "Simpan Data Barang"}
           </button>
         </div>
       </form>
