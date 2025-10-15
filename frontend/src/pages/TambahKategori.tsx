@@ -17,7 +17,7 @@ export const TambahKategori = () => {
       const kategoriData = {
         name: formData.get("name"),
         description: formData.get("description"),
-        status: formData.get("status") === "true",
+        status: formData.get("status") === "true", // Convert string to boolean
       };
 
       console.log("Sending data:", kategoriData);
@@ -39,9 +39,12 @@ export const TambahKategori = () => {
         }
         return navigate("/admin/daftar-kategori");
       }
-    } catch (error) {
-      console.error("Error details:", error);
-      alert("Terjadi kesalahan saat menambahkan kategori.");
+    } catch (error: any) {
+      console.error("Error details:", error.response?.data || error);
+      toast.error(
+        error.response?.data?.message ||
+          "Terjadi kesalahan saat menambahkan kategori."
+      );
     } finally {
       setIsLoading(false);
     }

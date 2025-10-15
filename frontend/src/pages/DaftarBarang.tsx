@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Item } from "../types";
 import { SearchIcon } from "../components/Icons.tsx";
 import { Link } from "react-router-dom";
-import { categoryItem } from "../types/index";
+import { formatDateTime } from "../utils/dateUtils";
 
 interface DaftarBarangProps {
   items: Item[];
@@ -15,7 +15,18 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("Semua");
-  const filters = items.map((item) => item.kategoriBarang);
+
+  // Ambil kategori unik dengan useMemo
+  const uniqueCategories = useMemo(() => {
+    const categoryMap = new Map();
+    items.forEach((item) => {
+      if (!categoryMap.has(item.kategoriBarang.id)) {
+        categoryMap.set(item.kategoriBarang.id, item.kategoriBarang);
+      }
+    });
+    return Array.from(categoryMap.values());
+  }, [items]);
+
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -52,17 +63,17 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
         >
           Semua
         </button>
-        {filters.map((filter: categoryItem) => (
+        {uniqueCategories.map((category) => (
           <button
-            key={filter.id}
-            onClick={() => setActiveFilter(filter.id.toString())}
+            key={category.id}
+            onClick={() => setActiveFilter(category.id.toString())}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-200 ${
-              activeFilter === filter.id.toString()
+              activeFilter === category.id.toString()
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
-            {filter.name}
+            {category.name}
           </button>
         ))}
       </div>
@@ -90,7 +101,7 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
                 {item.name}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
-                Ditemukan: {item.foundDate}
+                Ditemukan: {formatDateTime(item.foundDate)}
               </p>
               <p className="text-sm text-gray-500">Lokasi: {item.location}</p>
             </div>

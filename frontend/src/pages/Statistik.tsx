@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Item } from "../types";
+import { calculateStorageDuration } from "../utils/dateUtils";
 
 interface StatistikProps {
   items: Item[];
@@ -13,11 +14,12 @@ export const Statistik: React.FC<StatistikProps> = ({ items }) => {
     let totalStorageDays = 0;
     if (claimedItems.length > 0) {
       totalStorageDays = claimedItems.reduce((acc, item) => {
-        const foundDate = new Date(item.foundDate);
-        const claimedDate = new Date(item.claimer!.claimedDate);
-        const diffTime = Math.abs(claimedDate.getTime() - foundDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return acc + diffDays;
+        const duration = calculateStorageDuration(
+          item.foundDate,
+          item.claimer!.claimedDate
+        );
+        const days = parseInt(duration.split(" ")[0]) || 0;
+        return acc + days;
       }, 0);
     }
     const avgStorage =
