@@ -22,7 +22,7 @@ export type Item = {
   name: string;
   description: string;
   foundDate: string;
-  status: "Ditemukan" | "Diambil";
+  status: "DITEMUKAN" | "DIAMBIL";
   imageUrl: string;
   location: string;
   kategoriBarang: categoryItem;

@@ -91,13 +91,13 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
                 <p className="text-gray-600">{item.description}</p>
               </div>
               <span
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  item.status === "Ditemukan"
+                className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
+                  item.status === "DITEMUKAN"
                     ? "bg-green-100 text-green-800"
                     : "bg-yellow-100 text-yellow-800"
                 }`}
               >
-                {item.status}
+                {item.status.toLowerCase()}
               </span>
             </div>
             <div className="border-t border-gray-200 my-6"></div>
@@ -114,16 +114,21 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
               </div>
               <div>
                 <p className="text-gray-500">Status</p>
-                <p className="font-semibold">{item.status}</p>
+                <p className="font-semibold capitalize">
+                  {item.status.toLowerCase()}
+                </p>
               </div>
               <div>
                 <p className="text-gray-500">Lama Tersimpan</p>
                 <p className="font-semibold">
-                  {calculateStorageDuration(item.foundDate, item.claimer?.claimedDate)}
+                  {calculateStorageDuration(
+                    item.foundDate,
+                    item.claimer?.claimedDate
+                  )}
                 </p>
               </div>
             </div>
-            {item.status === "Ditemukan" && (
+            {item.status === "DITEMUKAN" && (
               <div className="text-right mt-6">
                 <button
                   onClick={() => setClaimModalOpen(true)}
