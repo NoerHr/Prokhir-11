@@ -3,11 +3,15 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { ClaimRequest } from "../types";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { API_ENDPOINTS } from "../config/api";
+import api from "../config/api";
 
 export const DaftarPengajuan = () => {
   const [claimRequests, setClaimRequests] = useState<ClaimRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
+  const [filter, setFilter] = useState<
+    "All" | "Pending" | "Approved" | "Rejected"
+  >("All");
   const [selectedClaim, setSelectedClaim] = useState<ClaimRequest | null>(null);
   const [adminNote, setAdminNote] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -15,7 +19,7 @@ export const DaftarPengajuan = () => {
 
   const fetchClaimRequests = async () => {
     try {
-      const response = await axios.get("http://localhost:2006/claim-requests");
+      const response = await api.get(API_ENDPOINTS.CLAIMS.LIST);
       setClaimRequests(response.data?.data || []);
     } catch (error) {
       console.error(error);
@@ -34,7 +38,10 @@ export const DaftarPengajuan = () => {
     return req.status === filter;
   });
 
-  const handleUpdateStatus = async (claimId: number, status: "Approved" | "Rejected") => {
+  const handleUpdateStatus = async (
+    claimId: number,
+    status: "Approved" | "Rejected"
+  ) => {
     setIsProcessing(true);
     try {
       const response = await axios.patch(
@@ -95,7 +102,9 @@ export const DaftarPengajuan = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Daftar Pengajuan Pengambilan Barang</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">
+        Daftar Pengajuan Pengambilan Barang
+      </h1>
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">
@@ -111,9 +120,18 @@ export const DaftarPengajuan = () => {
           >
             {status}
             {status === "All" && ` (${claimRequests.length})`}
-            {status === "Pending" && ` (${claimRequests.filter((r) => r.status === "Pending").length})`}
-            {status === "Approved" && ` (${claimRequests.filter((r) => r.status === "Approved").length})`}
-            {status === "Rejected" && ` (${claimRequests.filter((r) => r.status === "Rejected").length})`}
+            {status === "Pending" &&
+              ` (${
+                claimRequests.filter((r) => r.status === "Pending").length
+              })`}
+            {status === "Approved" &&
+              ` (${
+                claimRequests.filter((r) => r.status === "Approved").length
+              })`}
+            {status === "Rejected" &&
+              ` (${
+                claimRequests.filter((r) => r.status === "Rejected").length
+              })`}
           </button>
         ))}
       </div>
@@ -127,7 +145,9 @@ export const DaftarPengajuan = () => {
               <th className="p-4 text-gray-600 font-semibold">Nama Barang</th>
               <th className="p-4 text-gray-600 font-semibold">Pengaju</th>
               <th className="p-4 text-gray-600 font-semibold">NIM</th>
-              <th className="p-4 text-gray-600 font-semibold">Tanggal Pengajuan</th>
+              <th className="p-4 text-gray-600 font-semibold">
+                Tanggal Pengajuan
+              </th>
               <th className="p-4 text-gray-600 font-semibold">Status</th>
               <th className="p-4 text-gray-600 font-semibold">Aksi</th>
             </tr>
@@ -137,17 +157,27 @@ export const DaftarPengajuan = () => {
               filteredRequests.map((claim, index) => (
                 <tr
                   key={claim.id}
-                  className={index !== filteredRequests.length - 1 ? "border-b border-gray-200" : ""}
+                  className={
+                    index !== filteredRequests.length - 1
+                      ? "border-b border-gray-200"
+                      : ""
+                  }
                 >
                   <td className="p-4 text-gray-700">{index + 1}</td>
-                  <td className="p-4 text-gray-700 font-medium">{claim.itemName}</td>
+                  <td className="p-4 text-gray-700 font-medium">
+                    {claim.itemName}
+                  </td>
                   <td className="p-4 text-gray-700">{claim.userName}</td>
                   <td className="p-4 text-gray-700">{claim.userNim}</td>
                   <td className="p-4 text-gray-700">
                     {new Date(claim.createdAt).toLocaleDateString("id-ID")}
                   </td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(claim.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
+                        claim.status
+                      )}`}
+                    >
                       {claim.status}
                     </span>
                   </td>
@@ -193,7 +223,11 @@ export const DaftarPengajuan = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(selectedClaim.status)}`}>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
+                      selectedClaim.status
+                    )}`}
+                  >
                     {selectedClaim.status}
                   </span>
                 </div>
@@ -207,11 +241,15 @@ export const DaftarPengajuan = () => {
                 </div>
                 <div className="col-span-2">
                   <p className="text-sm text-gray-500">Alasan Pengajuan</p>
-                  <p className="mt-1 p-3 bg-gray-50 rounded">{selectedClaim.alasan}</p>
+                  <p className="mt-1 p-3 bg-gray-50 rounded">
+                    {selectedClaim.alasan}
+                  </p>
                 </div>
                 {selectedClaim.buktiUrl && (
                   <div className="col-span-2">
-                    <p className="text-sm text-gray-500 mb-2">Bukti Kepemilikan</p>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Bukti Kepemilikan
+                    </p>
                     <img
                       src={selectedClaim.buktiUrl}
                       alt="Bukti"
@@ -222,7 +260,9 @@ export const DaftarPengajuan = () => {
                 {selectedClaim.adminNote && (
                   <div className="col-span-2">
                     <p className="text-sm text-gray-500">Catatan Admin</p>
-                    <p className="mt-1 p-3 bg-blue-50 rounded">{selectedClaim.adminNote}</p>
+                    <p className="mt-1 p-3 bg-blue-50 rounded">
+                      {selectedClaim.adminNote}
+                    </p>
                   </div>
                 )}
               </div>
@@ -230,7 +270,9 @@ export const DaftarPengajuan = () => {
               {selectedClaim.status === "Pending" && (
                 <div className="mt-6 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Catatan Admin (Opsional)</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Catatan Admin (Opsional)
+                    </label>
                     <textarea
                       value={adminNote}
                       onChange={(e) => setAdminNote(e.target.value)}
@@ -241,14 +283,18 @@ export const DaftarPengajuan = () => {
                   </div>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleUpdateStatus(selectedClaim.id, "Approved")}
+                      onClick={() =>
+                        handleUpdateStatus(selectedClaim.id, "Approved")
+                      }
                       disabled={isProcessing}
                       className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
                     >
                       {isProcessing ? "Memproses..." : "Setujui"}
                     </button>
                     <button
-                      onClick={() => handleUpdateStatus(selectedClaim.id, "Rejected")}
+                      onClick={() =>
+                        handleUpdateStatus(selectedClaim.id, "Rejected")
+                      }
                       disabled={isProcessing}
                       className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400"
                     >
@@ -264,8 +310,9 @@ export const DaftarPengajuan = () => {
                     ✓ Pengajuan telah disetujui
                   </p>
                   <p className="text-sm text-green-700 mt-1">
-                    User dapat mengambil barang. Untuk menandai barang sudah diambil, 
-                    buka <strong>Detail Barang</strong> dan klik "Tandai Sudah Diambil".
+                    User dapat mengambil barang. Untuk menandai barang sudah
+                    diambil, buka <strong>Detail Barang</strong> dan klik
+                    "Tandai Sudah Diambil".
                   </p>
                 </div>
               )}

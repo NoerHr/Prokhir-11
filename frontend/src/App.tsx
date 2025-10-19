@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, Navigate, Outlet } from "react-router-dom";
-import axios from "axios";
+import { api, API_ENDPOINTS } from "./config/api";
 
 import { Item, Claimer, User } from "./types";
 import { Sidebar } from "./components/Sidebar";
@@ -61,11 +61,14 @@ function App() {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get("http://localhost:2006/get-barang");
-      setItems(response?.data?.data?.items || []);
+      const response = await api.get(API_ENDPOINTS.ITEMS.LIST);
+      setItems(response?.data?.data.items || []);
+      console.log("Daftar barang", response.data?.data.items);
     } catch (error) {
       console.log(error);
-      alert("Gagal memuat data dari server. Pastikan server back-end berjalan.");
+      alert(
+        "Gagal memuat data dari server. Pastikan server back-end berjalan."
+      );
     }
   };
 
@@ -100,8 +103,8 @@ function App() {
     formData.append("nim", claimerData.nim);
     formData.append("claimerPhoto", claimerPhoto);
     try {
-      const response = await axios.post(
-        `http://localhost:2006/claim-barang/${itemId}`,
+      const response = await api.post(
+        API_ENDPOINTS.ITEMS.CLAIM(itemId),
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -120,9 +123,7 @@ function App() {
       )
     ) {
       try {
-        const response = await axios.delete(
-          `http://localhost:2006/delete-barang/${itemId}`
-        );
+        const response = await api.delete(API_ENDPOINTS.ITEMS.DELETE(itemId));
         toast.success(response.data?.message);
         await fetchItems();
         return navigate("/admin/daftar-barang");
@@ -210,7 +211,9 @@ function App() {
         <Route path="beranda" element={<Beranda items={items} />} />
         <Route
           path="daftar-barang"
-          element={<DaftarBarang items={items} setSelectedItem={setSelectedItem} />}
+          element={
+            <DaftarBarang items={items} setSelectedItem={setSelectedItem} />
+          }
         />
         <Route path="daftar-kategori" element={<DaftarKategori />} />
         <Route path="daftar-pengajuan" element={<DaftarPengajuan />} />

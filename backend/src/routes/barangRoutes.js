@@ -3,12 +3,17 @@ const router = express.Router();
 const barangController = require("../controllers/barangController");
 const upload = require("../config/multer");
 
-// Endpoint untuk barang
-router.get("/get-barang", barangController.getAllBarang);
+/**
+ * RESTful API Routes for Items (Barang)
+ * Base path: /api/v1/items
+ */
 
-// Upload multiple files: itemPhoto dan finderPhoto
+// GET /api/v1/items - Get all items
+router.get("/", barangController.getAllBarang);
+
+// POST /api/v1/items - Create new item
 router.post(
-  "/create-barang",
+  "/",
   upload.fields([
     { name: "itemPhoto", maxCount: 1 },
     { name: "finderPhoto", maxCount: 1 },
@@ -16,13 +21,17 @@ router.post(
   barangController.createBarang
 );
 
-// Upload single file untuk claimer photo
+// GET /api/v1/items/:id - Get single item by ID
+// router.get("/:id", barangController.getBarangById);
+
+// DELETE /api/v1/items/:id - Delete item
+router.delete("/:id", barangController.deleteBarang);
+
+// POST /api/v1/items/:id/claim - Claim an item
 router.post(
-  "/claim-barang/:id",
+  "/:id/claim",
   upload.single("claimerPhoto"),
   barangController.claimBarang
 );
-
-router.delete("/delete-barang/:id", barangController.deleteBarang);
 
 module.exports = router;

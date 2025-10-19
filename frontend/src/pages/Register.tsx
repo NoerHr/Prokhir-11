@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { api, API_ENDPOINTS } from "../config/api";
+import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
 interface RegisterProps {
@@ -18,11 +18,11 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    
+
     // Jika field name, hapus spasi otomatis
     if (e.target.name === "name") {
       value = value.replace(/\s/g, ""); // Hapus semua spasi
@@ -67,7 +67,7 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:2006/register", {
+      const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, {
         name: formData.name,
         nim: formData.nim,
         email: formData.email,
@@ -102,7 +102,10 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
         </p>
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Username <span className="text-red-500">*</span>
             </label>
             <input
@@ -119,7 +122,10 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
             />
           </div>
           <div>
-            <label htmlFor="nim" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="nim"
+              className="block text-sm font-medium text-gray-700"
+            >
               NIM <span className="text-red-500">*</span>
             </label>
             <input
@@ -133,12 +139,13 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
               className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="12345678"
             />
-            <p className="mt-1 text-xs text-gray-500">
-              Minimal 8 digit angka
-            </p>
+            <p className="mt-1 text-xs text-gray-500">Minimal 8 digit angka</p>
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -153,7 +160,10 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
             />
           </div>
           <div>
-            <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="contact"
+              className="block text-sm font-medium text-gray-700"
+            >
               Kontak (WA/Line)
             </label>
             <input
@@ -167,7 +177,10 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password <span className="text-red-500">*</span>
             </label>
             <input
@@ -183,7 +196,10 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
             />
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
               Konfirmasi Password <span className="text-red-500">*</span>
             </label>
             <input
@@ -211,12 +227,18 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
         </form>
         <p className="text-center text-sm text-gray-500 mt-6">
           Sudah punya akun?{" "}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link
+            to="/login"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Login di sini
           </Link>
         </p>
         <p className="text-center text-sm text-gray-500 mt-2">
-          <Link to="/" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link
+            to="/"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Kembali ke dashboard
           </Link>
         </p>

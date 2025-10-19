@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { api, API_ENDPOINTS } from "../config/api";
 import { Link } from "react-router-dom";
 
 interface LoginProps {
@@ -17,7 +17,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
     setError("");
     try {
-      const response = await axios.post("http://localhost:2006/login", {
+      const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
         name,
         password,
       });
@@ -77,9 +77,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               placeholder="******"
             />
           </div>
-          {error && (
-            <p className="text-sm text-red-600 text-center">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
           <div>
             <button
               type="submit"

@@ -1,51 +1,83 @@
-const pool = require("../config/database");
+const prisma = require("../config/prisma");
 
+/**
+ * Kategori Repository
+ * Menggunakan Prisma ORM untuk database operations
+ */
 class KategoriRepository {
-    async findAll() {
-        const query = "SELECT * FROM kategori_barang ORDER BY created_at DESC, id DESC";
-        const result = await pool.query(query);
-        return result.rows;
-    }
+  /**
+   * Mengambil semua kategori
+   */
+  async findAll() {
+    return await prisma.kategoriBarang.findMany({
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      include: {
+        _count: {
+          select: { barangs: true },
+        },
+      },
+    });
+  }
 
-    async findAllActive() {
-        const query = "SELECT * FROM kategori_barang WHERE status = true ORDER BY name ASC";
-        const result = await pool.query(query);
-        return result.rows;
-    }
+  /**
+   * Mengambil kategori yang aktif saja
+   */
+  async findAllActive() {
+    return await prisma.kategoriBarang.findMany({
+      where: { status: true },
+      orderBy: { name: "asc" },
+    });
+  }
 
-    async findById(id) {
-        const query = "SELECT * FROM kategori_barang WHERE id = $1";
-        const result = await pool.query(query, [id]);
-        return result.rows[0] || null;
-    }
+  /**
+   * Mencari kategori berdasarkan ID
+   */
+  async findById(id) {
+    return await prisma.kategoriBarang.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        barangs: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+  }
 
-    async create(kategoriData) {
-        const query = `
-            INSERT INTO kategori_barang (name, description, status)
-            VALUES ($1, $2, $3)
-            RETURNING *
-        `;
-        const values = [kategoriData.name, kategoriData.description, kategoriData.status];
-        const result = await pool.query(query, values);
-        return result.rows[0];
-    }
+  /**
+   * Membuat kategori baru
+   */
+  async create(kategoriData) {
+    return await prisma.kategoriBarang.create({
+      data: {
+        name: kategoriData.name,
+        status: kategoriData.status ?? true,
+      },
+    });
+  }
 
-    async updateStatus(id, status) {
-        const query = `
-            UPDATE kategori_barang
-            SET status = $1
-            WHERE id = $2
-            RETURNING *
-        `;
-        const result = await pool.query(query, [status, id]);
-        return result.rows[0] || null;
-    }
+  /**
+   * Update status kategori
+   */
+  async updateStatus(id, status) {
+    return await prisma.kategoriBarang.update({
+      where: { id: parseInt(id) },
+      data: { status },
+    });
+  }
 
-    async delete(id) {
-        const query = "DELETE FROM kategori_barang WHERE id = $1 RETURNING id";
-        const result = await pool.query(query, [id]);
-        return result.rowCount > 0;
+  /**
+   * Delete kategori
+   */
+  async delete(id) {
+    try {
+      await prisma.kategoriBarang.delete({
+        where: { id: parseInt(id) },
+      });
+      return true;
+    } catch (error) {
+      return false;
     }
+  }
 }
 
 module.exports = new KategoriRepository();

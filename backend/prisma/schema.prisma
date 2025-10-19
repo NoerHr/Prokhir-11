@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - untuk authentication
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  nim       String   @unique
+  email     String   @unique
+  password  String
+  contact   String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  claimRequests ClaimRequest[]
+
+  @@map("users")
+}
+
+// Kategori Barang model
+model KategoriBarang {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  barangs Barang[]
+
+  @@map("kategori_barang")
+}
+
+// Barang (Lost Items) model
+model Barang {
+  id             Int           @id @default(autoincrement())
+  name           String
+  description    String
+  foundDate      DateTime      @map("found_date")
+  location       String
+  imageUrl       String        @map("image_url")
+  finderName     String        @map("finder_name")
+  finderNim      String        @map("finder_nim")
+  finderContact  String        @map("finder_contact")
+  finderPhotoUrl String        @map("finder_photo_url")
+  categoryId     Int           @map("category_id")
+  status         BarangStatus  @default(DITEMUKAN)
+  claimedDate    DateTime?     @map("claimed_date")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  category      KategoriBarang  @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  claimRequests ClaimRequest[]
+
+  @@map("barang")
+}
+
+// Claim Request model
+model ClaimRequest {
+  id          Int         @id @default(autoincrement())
+  barangId    Int         @map("barang_id")
+  userId      Int         @map("user_id")
+  alasan      String
+  buktiUrl    String?     @map("bukti_url")
+  status      ClaimStatus @default(PENDING)
+  adminNote   String?     @map("admin_note")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  processedAt DateTime?   @map("processed_at")
+
+  // Relations
+  barang Barang @relation(fields: [barangId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("claim_requests")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  USER
+}
+
+enum BarangStatus {
+  DITEMUKAN
+  DIAMBIL
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
