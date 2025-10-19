@@ -1,45 +1,71 @@
-const pool = require("../config/database");
+const prisma = require("../config/prisma");
 
+/**
+ * User Repository
+ * Menggunakan Prisma ORM untuk database operations
+ */
 class UserRepository {
+  /**
+   * Mencari user berdasarkan credentials (login admin)
+   */
   async findByCredentials(name, password) {
-    const query = "SELECT * FROM users WHERE name = $1 AND password = $2 AND role = 'admin'";
-    const result = await pool.query(query, [name, password]);
-    return result.rows[0] || null;
+    return await prisma.user.findFirst({
+      where: {
+        name,
+        password,
+        role: "ADMIN",
+      },
+    });
   }
 
+  /**
+   * Mencari user berdasarkan name (untuk user biasa)
+   */
   async findByName(name) {
-    const query = "SELECT * FROM users WHERE name = $1 AND role = 'user'";
-    const result = await pool.query(query, [name]);
-    return result.rows[0] || null;
+    return await prisma.user.findFirst({
+      where: {
+        name,
+        role: "USER",
+      },
+    });
   }
 
+  /**
+   * Mencari user berdasarkan NIM
+   */
   async findByNim(nim) {
-    const query = "SELECT * FROM users WHERE nim = $1";
-    const result = await pool.query(query, [nim]);
-    return result.rows[0] || null;
+    return await prisma.user.findUnique({
+      where: { nim },
+    });
   }
 
+  /**
+   * Membuat user baru
+   */
   async create(userData) {
-    const query = `
-      INSERT INTO users (name, nim, email, password, contact, role)
-      VALUES ($1, $2, $3, $4, $5, 'user')
-      RETURNING *
-    `;
-    const values = [
-      userData.name,
-      userData.nim,
-      userData.email,
-      userData.password,
-      userData.contact,
-    ];
-    const result = await pool.query(query, values);
-    return result.rows[0];
+    return await prisma.user.create({
+      data: {
+        name: userData.name,
+        nim: userData.nim,
+        email: userData.email,
+        password: userData.password,
+        contact: userData.contact,
+        role: "USER",
+      },
+    });
   }
 
+  /**
+   * Mencari user berdasarkan credentials (login user biasa)
+   */
   async findUserByCredentials(name, password) {
-    const query = "SELECT * FROM users WHERE name = $1 AND password = $2 AND role = 'user'";
-    const result = await pool.query(query, [name, password]);
-    return result.rows[0] || null;
+    return await prisma.user.findFirst({
+      where: {
+        name,
+        password,
+        role: "USER",
+      },
+    });
   }
 }
 

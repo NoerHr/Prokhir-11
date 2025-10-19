@@ -1,139 +1,187 @@
-const pool = require("../config/database");
+const prisma = require("../config/prisma");
 
+/**
+ * Claim Repository
+ * Menggunakan Prisma ORM untuk database operations
+ */
 class ClaimRepository {
-    async findAll() {
-        const query = `
-            SELECT 
-                cr.*,
-                b.name as item_name,
-                u.name as user_name,
-                u.nim as user_nim
-            FROM claim_requests cr
-            JOIN barang b ON cr.item_id = b.id
-            JOIN users u ON cr.user_id = u.id
-            ORDER BY cr.created_at DESC
-        `;
-        const result = await pool.query(query);
-        return result.rows.map(row => ({
-            id: row.id,
-            itemId: row.item_id,
-            itemName: row.item_name,
-            userId: row.user_id,
-            userName: row.user_name,
-            userNim: row.user_nim,
-            alasan: row.alasan,
-            buktiUrl: row.bukti_url,
-            status: row.status,
-            adminNote: row.admin_note,
-            createdAt: row.created_at,
-            processedAt: row.processed_at,
-        }));
-    }
+  /**
+   * Mengambil semua claim requests dengan relasi
+   */
+  async findAll() {
+    const claims = await prisma.claimRequest.findMany({
+      include: {
+        barang: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            nim: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-    async findById(id) {
-        const query = `
-            SELECT 
-                cr.*,
-                b.name as item_name,
-                u.name as user_name,
-                u.nim as user_nim
-            FROM claim_requests cr
-            JOIN barang b ON cr.item_id = b.id
-            JOIN users u ON cr.user_id = u.id
-            WHERE cr.id = $1
-        `;
-        const result = await pool.query(query, [id]);
-        if (result.rows.length === 0) return null;
-        
-        const row = result.rows[0];
-        return {
-            id: row.id,
-            itemId: row.item_id,
-            itemName: row.item_name,
-            userId: row.user_id,
-            userName: row.user_name,
-            userNim: row.user_nim,
-            alasan: row.alasan,
-            buktiUrl: row.bukti_url,
-            status: row.status,
-            adminNote: row.admin_note,
-            createdAt: row.created_at,
-            processedAt: row.processed_at,
-        };
-    }
+    // Transform to match existing format
+    return claims.map((claim) => ({
+      id: claim.id,
+      itemId: claim.barangId,
+      itemName: claim.barang.name,
+      userId: claim.userId,
+      userName: claim.user.name,
+      userNim: claim.user.nim,
+      alasan: claim.alasan,
+      buktiUrl: claim.buktiUrl,
+      status: claim.status,
+      adminNote: claim.adminNote,
+      createdAt: claim.createdAt,
+      processedAt: claim.processedAt,
+    }));
+  }
 
-    async findByItemId(itemId) {
-        const query = "SELECT * FROM claim_requests WHERE item_id = $1";
-        const result = await pool.query(query, [itemId]);
-        return result.rows;
-    }
+  /**
+   * Mencari claim berdasarkan ID
+   */
+  async findById(id) {
+    const claim = await prisma.claimRequest.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        barang: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            nim: true,
+          },
+        },
+      },
+    });
 
-    async findByUserId(userId) {
-        const query = `
-            SELECT 
-                cr.*,
-                b.name as item_name
-            FROM claim_requests cr
-            JOIN barang b ON cr.item_id = b.id
-            WHERE cr.user_id = $1
-            ORDER BY cr.created_at DESC
-        `;
-        const result = await pool.query(query, [userId]);
-        return result.rows.map(row => ({
-            id: row.id,
-            itemId: row.item_id,
-            itemName: row.item_name,
-            userId: row.user_id,
-            alasan: row.alasan,
-            buktiUrl: row.bukti_url,
-            status: row.status,
-            adminNote: row.admin_note,
-            createdAt: row.created_at,
-            processedAt: row.processed_at,
-        }));
-    }
+    if (!claim) return null;
 
-    async create(claimData) {
-        const query = `
-            INSERT INTO claim_requests (item_id, user_id, alasan, bukti_url)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *
-        `;
-        const values = [
-            claimData.itemId,
-            claimData.userId,
-            claimData.alasan,
-            claimData.buktiUrl,
-        ];
-        const result = await pool.query(query, values);
-        return this.findById(result.rows[0].id);
-    }
+    return {
+      id: claim.id,
+      itemId: claim.barangId,
+      itemName: claim.barang.name,
+      userId: claim.userId,
+      userName: claim.user.name,
+      userNim: claim.user.nim,
+      alasan: claim.alasan,
+      buktiUrl: claim.buktiUrl,
+      status: claim.status,
+      adminNote: claim.adminNote,
+      createdAt: claim.createdAt,
+      processedAt: claim.processedAt,
+    };
+  }
 
-    async update(id, updateData) {
-        const query = `
-            UPDATE claim_requests
-            SET 
-                status = COALESCE($1, status),
-                admin_note = COALESCE($2, admin_note),
-                processed_at = COALESCE($3, processed_at)
-            WHERE id = $4
-            RETURNING *
-        `;
-        const values = [
-            updateData.status || null,
-            updateData.adminNote || null,
-            updateData.processedAt || null,
-            id,
-        ];
-        await pool.query(query, values);
-        return this.findById(id);
-    }
+  /**
+   * Mencari claims berdasarkan item ID
+   */
+  async findByItemId(itemId) {
+    return await prisma.claimRequest.findMany({
+      where: { barangId: parseInt(itemId) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            nim: true,
+          },
+        },
+      },
+    });
+  }
 
-    async delete(id) {
-        const query = "DELETE FROM claim_requests WHERE id = $1 RETURNING id";
-        const result = await pool.query(query, [id]);
-        return result.rowCount > 0;
+  /**
+   * Mencari claims berdasarkan user ID
+   */
+  async findByUserId(userId) {
+    const claims = await prisma.claimRequest.findMany({
+      where: { userId: parseInt(userId) },
+      include: {
+        barang: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return claims.map((claim) => ({
+      id: claim.id,
+      itemId: claim.barangId,
+      itemName: claim.barang.name,
+      userId: claim.userId,
+      alasan: claim.alasan,
+      buktiUrl: claim.buktiUrl,
+      status: claim.status,
+      adminNote: claim.adminNote,
+      createdAt: claim.createdAt,
+      processedAt: claim.processedAt,
+    }));
+  }
+
+  /**
+   * Membuat claim request baru
+   */
+  async create(claimData) {
+    const claim = await prisma.claimRequest.create({
+      data: {
+        barangId: parseInt(claimData.itemId),
+        userId: parseInt(claimData.userId),
+        alasan: claimData.alasan,
+        buktiUrl: claimData.buktiUrl || null,
+      },
+    });
+
+    return this.findById(claim.id);
+  }
+
+  /**
+   * Update claim request (approve/reject)
+   */
+  async update(id, updateData) {
+    await prisma.claimRequest.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: updateData.status || undefined,
+        adminNote: updateData.adminNote || undefined,
+        processedAt: updateData.processedAt
+          ? new Date(updateData.processedAt)
+          : undefined,
+      },
+    });
+
+    return this.findById(id);
+  }
+
+  /**
+   * Delete claim request
+   */
+  async delete(id) {
+    try {
+      await prisma.claimRequest.delete({
+        where: { id: parseInt(id) },
+      });
+      return true;
+    } catch (error) {
+      return false;
     }
+  }
 }
 
 module.exports = new ClaimRepository();

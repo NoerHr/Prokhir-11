@@ -1,86 +1,144 @@
-const pool = require("../config/database");
+const prisma = require("../config/prisma");
 
+/**
+ * Barang Repository
+ * Menggunakan Prisma ORM untuk database operations
+ */
 class BarangRepository {
+  /**
+   * Mengambil semua barang dengan relasi kategori
+   */
   async findAll() {
-    const query = `
-      SELECT 
-        b.*,
-        k.id as kategori_id,
-        k.name as kategori_name
-      FROM barang b
-      JOIN kategori_barang k ON b.category_id = k.id
-      ORDER BY b.created_at DESC
-    `;
-    const result = await pool.query(query);
-    return result.rows;
+    return await prisma.barang.findMany({
+      include: {
+        category: true,
+        _count: {
+          select: { claimRequests: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
+  /**
+   * Mencari barang berdasarkan ID dengan relasi lengkap
+   */
   async findById(id) {
-    const query = `
-      SELECT 
-        b.*,
-        k.id as kategori_id,
-        k.name as kategori_name
-      FROM barang b
-      JOIN kategori_barang k ON b.category_id = k.id
-      WHERE b.id = $1
-    `;
-    const result = await pool.query(query, [id]);
-    return result.rows[0] || null;
+    return await prisma.barang.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        category: true,
+        claimRequests: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                nim: true,
+                email: true,
+                contact: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
   }
 
+  /**
+   * Membuat barang baru
+   */
   async create(data) {
-    const query = `
-      INSERT INTO barang (
-        name, description, category_id, found_date, location, 
-        image_url, finder_name, finder_nim, finder_contact, finder_photo_url
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *
-    `;
-    const values = [
-      data.name,
-      data.description,
-      data.category_id,
-      data.found_date,
-      data.location,
-      data.image_url,
-      data.finder_name,
-      data.finder_nim,
-      data.finder_contact,
-      data.finder_photo_url,
-    ];
-    const result = await pool.query(query, values);
-    return result.rows[0];
+    return await prisma.barang.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        categoryId: parseInt(data.category_id),
+        foundDate: new Date(data.found_date),
+        location: data.location,
+        imageUrl: data.image_url,
+        finderName: data.finder_name,
+        finderNim: data.finder_nim,
+        finderContact: data.finder_contact,
+        finderPhotoUrl: data.finder_photo_url,
+        status: "DITEMUKAN",
+      },
+      include: {
+        category: true,
+      },
+    });
   }
 
+  /**
+   * Update barang (untuk claim)
+   */
   async update(id, data) {
-    const query = `
-      UPDATE barang
-      SET 
-        status = COALESCE($1, status),
-        claimer_name = COALESCE($2, claimer_name),
-        claimer_nim = COALESCE($3, claimer_nim),
-        claimer_photo_url = COALESCE($4, claimer_photo_url),
-        claimed_date = COALESCE($5, claimed_date)
-      WHERE id = $6
-      RETURNING *
-    `;
-    const values = [
-      data.status || null,
-      data.claimer_name || null,
-      data.claimer_nim || null,
-      data.claimer_photo_url || null,
-      data.claimed_date || null,
-      id,
-    ];
-    const result = await pool.query(query, values);
-    return result.rows[0] || null;
+    return await prisma.barang.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: data.status || undefined,
+        claimedDate: data.claimed_date
+          ? new Date(data.claimed_date)
+          : undefined,
+      },
+      include: {
+        category: true,
+      },
+    });
   }
 
+  /**
+   * Delete barang
+   */
   async delete(id) {
-    const query = "DELETE FROM barang WHERE id = $1 RETURNING id";
-    const result = await pool.query(query, [id]);
-    return result.rowCount > 0;
+    try {
+      await prisma.barang.delete({
+        where: { id: parseInt(id) },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Mencari barang berdasarkan kategori
+   */
+  async findByCategory(categoryId) {
+    return await prisma.barang.findMany({
+      where: { categoryId: parseInt(categoryId) },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  /**
+   * Mencari barang berdasarkan status
+   */
+  async findByStatus(status) {
+    return await prisma.barang.findMany({
+      where: { status },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  /**
+   * Search barang berdasarkan keyword
+   */
+  async search(keyword) {
+    return await prisma.barang.findMany({
+      where: {
+        OR: [
+          { name: { contains: keyword, mode: "insensitive" } },
+          { description: { contains: keyword, mode: "insensitive" } },
+          { location: { contains: keyword, mode: "insensitive" } },
+        ],
+      },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
   }
 }
 
