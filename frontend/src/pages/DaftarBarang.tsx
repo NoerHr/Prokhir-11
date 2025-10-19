@@ -30,8 +30,7 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (activeFilter === "Semua" ||
-        item.kategoriBarang.id.toString() === activeFilter)
+      (activeFilter === "Semua" || item.kategoriBarang.id === activeFilter)
   );
 
   return (
@@ -106,13 +105,13 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
               <p className="text-sm text-gray-500">Lokasi: {item.location}</p>
             </div>
             <span
-              className={`absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium ${
-                item.status === "Ditemukan"
+              className={`absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-medium capitalize ${
+                item.status === "DITEMUKAN"
                   ? "bg-green-100 text-green-800"
                   : "bg-yellow-100 text-yellow-800"
               }`}
             >
-              {item.status}
+              {item.status.toLowerCase()}
             </span>
           </Link>
         ))}
