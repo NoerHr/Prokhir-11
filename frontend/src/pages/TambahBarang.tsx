@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api, API_ENDPOINTS } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
@@ -22,9 +22,7 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:2006/get-kategori-barang"
-        );
+        const response = await api.get(API_ENDPOINTS.CATEGORIES.LIST);
         // Filter hanya kategori yang aktif
         const activeCategories = (response.data?.data || []).filter(
           (cat: any) => cat.status === true
@@ -55,13 +53,9 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
     formData.append("finderPhoto", finderPhoto);
 
     try {
-      const response = await axios.post(
-        "http://localhost:2006/create-barang",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await api.post(API_ENDPOINTS.ITEMS.CREATE, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 201) {
         toast.success(response.data.message);
@@ -71,7 +65,8 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
     } catch (error: any) {
       console.error("Error details:", error.response?.data || error.message);
       toast.error(
-        error.response?.data?.message || "Terjadi kesalahan saat menambahkan barang."
+        error.response?.data?.message ||
+          "Terjadi kesalahan saat menambahkan barang."
       );
     } finally {
       setIsLoading(false);
@@ -278,7 +273,8 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
               />
               {finderPhoto && (
                 <p className="mt-1 text-xs text-green-600">
-                  ✓ {finderPhoto.name} ({(finderPhoto.size / 1024).toFixed(2)} KB)
+                  ✓ {finderPhoto.name} ({(finderPhoto.size / 1024).toFixed(2)}{" "}
+                  KB)
                 </p>
               )}
             </div>

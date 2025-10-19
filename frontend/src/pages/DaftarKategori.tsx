@@ -3,6 +3,8 @@ import { SearchIcon, TrashIcon } from "../components/Icons";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { ConfirmModal } from "../components/ConfirmModal";
+import api from "../config/api";
+import { API_ENDPOINTS } from "../config/api";
 
 interface Category {
   id: number;
@@ -19,9 +21,7 @@ export const DaftarKategori = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:2006/get-kategori-barang"
-      );
+      const response = await api.get(API_ENDPOINTS.CATEGORIES.LIST);
       setCategories(response.data?.data || []);
     } catch (error) {
       console.log(error);
@@ -58,7 +58,10 @@ export const DaftarKategori = () => {
     }
   };
 
-  const handleToggleStatus = async (categoryId: number, currentStatus: boolean) => {
+  const handleToggleStatus = async (
+    categoryId: number,
+    currentStatus: boolean
+  ) => {
     try {
       const response = await axios.patch(
         `http://localhost:2006/update-kategori-status/${categoryId}`,
@@ -127,10 +130,15 @@ export const DaftarKategori = () => {
                   </td>
                   <td className="p-4 text-center">
                     <button
-                      onClick={() => handleToggleStatus(category.id, category.status || false)}
+                      onClick={() =>
+                        handleToggleStatus(
+                          category.id,
+                          category.status || false
+                        )
+                      }
                       className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors ${
-                        category.status 
-                          ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                        category.status
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
                           : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                       }`}
                     >

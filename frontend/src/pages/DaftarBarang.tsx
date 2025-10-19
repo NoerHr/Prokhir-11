@@ -66,9 +66,9 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
         {uniqueCategories.map((category) => (
           <button
             key={category.id}
-            onClick={() => setActiveFilter(category.id.toString())}
+            onClick={() => setActiveFilter(category.id)}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-200 ${
-              activeFilter === category.id.toString()
+              activeFilter === category.id
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
