@@ -139,7 +139,7 @@ export const DetailBarang: React.FC<DetailBarangProps> = ({
               </div>
             )}
 
-            {item.status === "Diambil" && (
+            {item.status === "DIAMBIL" && (
               <div className="text-right mt-6">
                 <div className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-lg">
                   ✓ Barang sudah diambil
