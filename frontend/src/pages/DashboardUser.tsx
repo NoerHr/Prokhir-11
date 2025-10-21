@@ -21,7 +21,7 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
     const [selectedCategory, setSelectedCategory] = useState('Semua'); // Default 'Semua'
 
     // Hanya menampilkan barang yang berstatus 'Ditemukan'
-    const foundItems = items.filter(item => item.status === 'Ditemukan');
+    const foundItems = items.filter(item => item.status === 'DITEMUKAN');
 
     // Ambil daftar kategori unik dari data barang untuk pilihan filter
     const categories = useMemo(() => {

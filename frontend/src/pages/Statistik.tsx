@@ -58,7 +58,7 @@ export const Statistik: React.FC<StatistikProps> = ({ items }) => {
       found: monthlyData[label] || 0,
     }));
     return {
-      claimedCount: items.filter((i) => i.status === "Diambil").length,
+      claimedCount: items.filter((i) => i.status === "DIAMBIL").length,
       avgStorage,
       chartData,
       totalItems: items.length,

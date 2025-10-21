@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Item, User, ClaimRequest } from "../types";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-hot-toast"; 
+import { api, API_ENDPOINTS } from "../config/api"; 
 import { formatDateTime } from '../utils/dateUtils';
 import { ConfirmModal } from '../components/ConfirmModal';
 
@@ -136,7 +136,7 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
   const [myRequests, setMyRequests] = useState<ClaimRequest[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
-  const foundItems = items.filter((item) => item.status === "Ditemukan");
+  const foundItems = items.filter((item) => item.status === "DITEMUKAN");
 
   const categories = useMemo(() => {
     const allCategories = foundItems.map((item) => item.kategoriBarang.name);
@@ -162,7 +162,7 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
         formData.append("bukti", bukti);
       }
 
-      const response = await axios.post("http://localhost:2006/claim-request", formData, {
+      const response = await api.post(API_ENDPOINTS.CLAIMS.CREATE, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -182,8 +182,8 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
 
   const fetchMyRequests = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:2006/claim-requests/user/${user.nim}`
+      const response = await api.get(
+        API_ENDPOINTS.CLAIMS.BY_USER(user.nim as unknown as number)
       );
       setMyRequests(response.data.data || []);
     } catch (error) {
@@ -204,8 +204,8 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
     if (!deleteTarget) return;
 
     try {
-      const response = await axios.delete(
-        `http://localhost:2006/claim-request/${deleteTarget}`
+      const response = await api.delete(
+        API_ENDPOINTS.CLAIMS.DELETE(deleteTarget)
       );
       toast.success(response.data.message);
       await fetchMyRequests();

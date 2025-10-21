@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:reset": "prisma migrate reset",
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
     "prisma:pull": "prisma db pull",
@@ -24,7 +25,8 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "multer": "^2.0.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

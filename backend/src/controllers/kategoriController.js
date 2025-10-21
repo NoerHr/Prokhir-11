@@ -20,21 +20,6 @@ class KategoriController {
         try {
             const { name, description, status } = req.body;
 
-            if (!name || !description || status === undefined) {
-                return res.status(400).json({
-                    message: "Data kategori tidak lengkap",
-                });
-            }
-
-            let statusBoolean;
-            if (typeof status === 'string') {
-                statusBoolean = status === 'true';
-            } else if (typeof status === 'boolean') {
-                statusBoolean = status;
-            } else {
-                statusBoolean = Boolean(status);
-            }
-
             const kategoriData = {
                 name,
                 description,
@@ -60,14 +45,6 @@ class KategoriController {
         try {
             const { id } = req.params;
             const { status } = req.body;
-
-            if (status === undefined) {
-                return res.status(400).json({
-                    message: "Status tidak boleh kosong",
-                });
-            }
-
-            const statusBoolean = typeof status === 'string' ? status === 'true' : Boolean(status);
 
             const kategori = await kategoriRepository.findById(id);
             if (!kategori) {

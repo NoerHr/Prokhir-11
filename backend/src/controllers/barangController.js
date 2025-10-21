@@ -62,26 +62,8 @@ class BarangController {
         location,
       } = req.body;
 
-      if (
-        !name ||
-        !description ||
-        !category ||
-        !finderName ||
-        !finderNim ||
-        !foundDate ||
-        !foundTime ||
-        !location
-      ) {
-        return res.status(400).json({
-          message: "Data tidak lengkap",
-        });
-      }
-
-      if (!req.files?.itemPhoto || !req.files?.finderPhoto) {
-        return res.status(400).json({
-          message: "Foto barang dan foto penemu harus diupload",
-        });
-      }
+      const itemPhotoFile = req.files.itemPhoto[0];
+      const finderPhotoFile = req.files.finderPhoto[0];
 
       const kategori = await kategoriRepository.findById(category);
       if (!kategori) {
@@ -157,17 +139,8 @@ class BarangController {
       const { id } = req.params;
       const { name, nim } = req.body;
 
-      if (!name || !nim) {
-        return res.status(400).json({
-          message: "Data claimer tidak lengkap",
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          message: "Foto penerima harus diupload",
-        });
-      }
+      // File sudah dipastikan ada oleh Multer
+      const claimerPhotoFile = req.file;
 
       const barang = await barangRepository.findById(id);
       if (!barang) {

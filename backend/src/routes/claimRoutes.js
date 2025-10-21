@@ -1,26 +1,51 @@
 const express = require("express");
 const router = express.Router();
-const claimController = require("../controllers/claimController");
-const upload = require("../config/multer");
+const claimController = require("../controllers/claimController.js");
+const upload = require("../config/multer.js"); // Your Multer middleware
+
+// Import validate middleware and Zod schemas using require
+const validate = require('../middlewares/validate.js'); // Assuming validate.js uses module.exports
+const {
+  createClaimSchema,
+  getUserClaimsSchema,
+  updateClaimStatusSchema,
+  deleteClaimSchema
+} = require('../validations/claim.validation.js'); // Assuming claim.validation.js uses module.exports
 
 /**
  * RESTful API Routes for Claim Requests
- * Base path: /api/v1/claims
  */
 
-// GET /api/v1/claims - Get all claim requests
+// GET /claims - Get all claim requests (No validation needed here)
 router.get("/", claimController.getAllClaimRequests);
 
-// POST /api/v1/claims - Create new claim request
-router.post("/", upload.single("bukti"), claimController.createClaimRequest);
+// POST /claims - Create new claim request
+router.post(
+  "/",
+  upload.single("bukti"), // Multer handles file first
+  validate(createClaimSchema), // Then Zod validates body
+  claimController.createClaimRequest // Then controller
+);
 
-// GET /api/v1/claims/user/:userId - Get claims by user ID
-router.get("/user/:userId", claimController.getUserClaimRequests);
+// GET /claims/user/:userId - Get claims by user ID (NIM)
+router.get(
+  "/user/:userId",
+  validate(getUserClaimsSchema), // Validate userId in params
+  claimController.getUserClaimRequests
+);
 
-// PATCH /api/v1/claims/:id/status - Update claim status (approve/reject)
-router.patch("/:id/status", claimController.updateClaimStatus);
+// PATCH /claims/:id/status - Update claim status (approve/reject)
+router.patch(
+  "/:id/status",
+  validate(updateClaimStatusSchema), // Validate id in params and status/adminNote in body
+  claimController.updateClaimStatus
+);
 
-// DELETE /api/v1/claims/:id - Delete claim request
-router.delete("/:id", claimController.deleteClaimRequest);
+// DELETE /claims/:id - Delete claim request
+router.delete(
+  "/:id",
+  validate(deleteClaimSchema), // Validate id in params
+  claimController.deleteClaimRequest
+);
 
 module.exports = router;

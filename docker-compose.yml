@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: lostandfound-postgres
+    restart: always
+    environment:
+      # Ini sesuai dengan gambar 2 (Username & Password)
+      POSTGRES_USER: lostandfound
+      POSTGRES_PASSWORD: lostandfound
+      # Ini akan membuat database dari gambar 3 (lostandfound_db)
+      POSTGRES_DB: lostandfound_db
+    ports:
+      # Ini sesuai dengan gambar 2 (Port: 5432)
+      - "5432:5432"
+    volumes:
+      # Ini untuk menyimpan data database secara permanen
+      - lostandfound-data:/var/lib/postgresql/data
+
+volumes:
+  lostandfound-data:
+

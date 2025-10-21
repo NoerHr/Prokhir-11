@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { ClaimRequest } from "../types";
 import { ConfirmModal } from "../components/ConfirmModal";
@@ -10,7 +9,7 @@ export const DaftarPengajuan = () => {
   const [claimRequests, setClaimRequests] = useState<ClaimRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<
-    "All" | "Pending" | "Approved" | "Rejected"
+    "All" | "PENDING" | "APPROVED" | "REJECTED"
   >("All");
   const [selectedClaim, setSelectedClaim] = useState<ClaimRequest | null>(null);
   const [adminNote, setAdminNote] = useState("");
@@ -35,33 +34,37 @@ export const DaftarPengajuan = () => {
 
   const filteredRequests = claimRequests.filter((req) => {
     if (filter === "All") return true;
-    return req.status === filter;
+    return req.status.toUpperCase() === filter.toUpperCase();
   });
 
   const handleUpdateStatus = async (
     claimId: number,
-    status: "Approved" | "Rejected"
+    status: "APPROVED" | "REJECTED"
   ) => {
     setIsProcessing(true);
     try {
-      const response = await axios.patch(
-        `http://localhost:2006/claim-request/${claimId}/status`,
+      // === PERUBAHAN DI SINI ===
+      // Menggunakan `api` dan `API_ENDPOINTS`
+      const response = await api.patch( // Ganti axios.patch menjadi api.patch
+        API_ENDPOINTS.CLAIMS.UPDATE_STATUS(claimId), // Gunakan endpoint yang benar
         {
           status,
-          adminNote: adminNote || null,
+          adminNote: adminNote || null, // Body request tetap sama
         }
       );
+      // ========================
+
       toast.success(response.data.message);
-      setSelectedClaim(null);
-      setAdminNote("");
-      await fetchClaimRequests();
+      setSelectedClaim(null); // Tutup modal detail
+      setAdminNote(""); // Kosongkan catatan admin
+      await fetchClaimRequests(); // Refresh daftar pengajuan
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Gagal memproses pengajuan");
     } finally {
       setIsProcessing(false);
     }
   };
-
+  
   const handleDeleteClick = (claimId: number) => {
     setDeleteTarget(claimId);
   };
@@ -70,26 +73,28 @@ export const DaftarPengajuan = () => {
     if (!deleteTarget) return;
 
     try {
-      const response = await axios.delete(
-        `http://localhost:2006/claim-request/${deleteTarget}`
+      const response = await api.delete( 
+        API_ENDPOINTS.CLAIMS.DELETE(deleteTarget) 
       );
+      // ========================
+
       toast.success(response.data.message);
-      await fetchClaimRequests();
-      setSelectedClaim(null);
+      await fetchClaimRequests(); // Refresh daftar setelah hapus
+      setSelectedClaim(null); // Tutup modal detail jika klaim yang dihapus sedang dilihat
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Gagal menghapus pengajuan");
     } finally {
-      setDeleteTarget(null);
+      setDeleteTarget(null); // Tutup modal konfirmasi hapus
     }
   };
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      Pending: "bg-yellow-100 text-yellow-800",
-      Approved: "bg-green-100 text-green-800",
-      Rejected: "bg-red-100 text-red-800",
+    Pending: "bg-yellow-100 text-yellow-800",
+    Aproved: "bg-green-100 text-green-800",
+    Rejected: "bg-red-100 text-red-800",
     };
-    return badges[status as keyof typeof badges] || "bg-gray-100 text-gray-800";
+    return badges[status.toUpperCase() as keyof typeof badges] || "bg-gray-100 text-gray-800";
   };
 
   if (isLoading) {
@@ -108,7 +113,7 @@ export const DaftarPengajuan = () => {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">
-        {["All", "Pending", "Approved", "Rejected"].map((status) => (
+        {["All", "PENDING", "APPROVED", "REJECTED"].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status as any)}
@@ -120,18 +125,18 @@ export const DaftarPengajuan = () => {
           >
             {status}
             {status === "All" && ` (${claimRequests.length})`}
-            {status === "Pending" &&
+            {status === "PENDING" &&
               ` (${
-                claimRequests.filter((r) => r.status === "Pending").length
-              })`}
-            {status === "Approved" &&
+            claimRequests.filter((r) => r.status.toUpperCase() === "PENDING").length // <-- Pakai toUpperCase()
+            })`}
+            {status === "APPROVED" &&
               ` (${
-                claimRequests.filter((r) => r.status === "Approved").length
-              })`}
-            {status === "Rejected" &&
+              claimRequests.filter((r) => r.status.toUpperCase() === "APPROVED").length // <-- Pakai toUpperCase()
+           })`}
+            {status === "REJECTED" &&
               ` (${
-                claimRequests.filter((r) => r.status === "Rejected").length
-              })`}
+              claimRequests.filter((r) => r.status.toUpperCase() === "REJECTED").length // <-- Pakai toUpperCase()
+           })`}
           </button>
         ))}
       </div>
@@ -267,44 +272,46 @@ export const DaftarPengajuan = () => {
                 )}
               </div>
 
-              {selectedClaim.status === "Pending" && (
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Catatan Admin (Opsional)
-                    </label>
-                    <textarea
-                      value={adminNote}
-                      onChange={(e) => setAdminNote(e.target.value)}
-                      rows={3}
-                      className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Tambahkan catatan jika diperlukan..."
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() =>
-                        handleUpdateStatus(selectedClaim.id, "Approved")
-                      }
-                      disabled={isProcessing}
-                      className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
-                    >
-                      {isProcessing ? "Memproses..." : "Setujui"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleUpdateStatus(selectedClaim.id, "Rejected")
-                      }
-                      disabled={isProcessing}
-                      className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400"
-                    >
-                      {isProcessing ? "Memproses..." : "Tolak"}
-                    </button>
-                  </div>
-                </div>
-              )}
+              {selectedClaim.status.toUpperCase() === "PENDING" && (
+                    <div className="mt-6 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Catatan Admin (Opsional)
+                        </label>
+                        <textarea
+                          value={adminNote}
+                          onChange={(e) => setAdminNote(e.target.value)}
+                          rows={3}
+                          className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Tambahkan catatan jika diperlukan..."
+                        />
+                      </div>
+                      <div className="flex gap-3">
+                        {/* === TOMBOL SETUJUI === */}
+                        <button
+                          onClick={() =>
+                            handleUpdateStatus(selectedClaim.id, "APPROVED")
+                          }
+                          disabled={isProcessing}
+                          className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                        >
+                          {isProcessing ? "Memproses..." : "Setujui"}
+                        </button>
+                        {/* === TOMBOL TOLAK === */}
+                        <button
+                          onClick={() =>
+                            handleUpdateStatus(selectedClaim.id, "REJECTED")
+                          }
+                          disabled={isProcessing}
+                          className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400"
+                        >
+                          {isProcessing ? "Memproses..." : "Tolak"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
-              {selectedClaim.status === "Approved" && (
+              {selectedClaim.status.toUpperCase() === "APPROVED" && (
                 <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-green-800 font-medium">
                     ✓ Pengajuan telah disetujui
@@ -317,7 +324,7 @@ export const DaftarPengajuan = () => {
                 </div>
               )}
 
-              {selectedClaim.status === "Rejected" && (
+              {selectedClaim.status.toUpperCase() === "REJECTED" && (
                 <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-800 font-medium">
                     ✗ Pengajuan telah ditolak

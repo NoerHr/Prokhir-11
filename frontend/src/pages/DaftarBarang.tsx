@@ -30,7 +30,7 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (activeFilter === "Semua" || item.kategoriBarang.id === activeFilter)
+      (activeFilter === "Semua" || item.kategoriBarang.id === +activeFilter)       
   );
 
   return (

@@ -42,21 +42,21 @@ export const DaftarKategori = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      const response = await axios.delete(
-        `http://localhost:2006/delete-kategori-barang/${deleteTarget}`
-      );
-      toast.success(response.data?.message);
-      await fetchCategories();
-    } catch (error) {
-      console.log(error);
-      toast.error("Gagal menghapus kategori.");
-    } finally {
-      setDeleteTarget(null);
-    }
-  };
+  if (!deleteTarget) return;
+  try {
+    // Gunakan api dan API_ENDPOINTS
+    const response = await api.delete(
+      API_ENDPOINTS.CATEGORIES.DELETE(deleteTarget) 
+    );
+    toast.success(response.data?.message);
+    await fetchCategories();
+  } catch (error: any) { // Tambahkan 'any' untuk tipe error
+    console.log(error);
+    toast.error(error.response?.data?.message || "Gagal menghapus kategori.");
+  } finally {
+    setDeleteTarget(null);
+  }
+};
 
   const handleToggleStatus = async (
     categoryId: number,

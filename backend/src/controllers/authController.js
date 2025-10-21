@@ -5,30 +5,6 @@ class AuthController {
         try {
             const { name, nim, email, password, contact } = req.body;
 
-            if (!name || !nim || !email || !password) {
-                return res.status(400).json({
-                    message: "Data tidak lengkap. Name, NIM, email, dan password wajib diisi.",
-                });
-            }
-
-            if (name.length < 3) {
-                return res.status(400).json({
-                    message: "Username minimal 3 karakter",
-                });
-            }
-
-            if (name.includes(" ")) {
-                return res.status(400).json({
-                    message: "Username tidak boleh mengandung spasi",
-                });
-            }
-
-            if (nim.length < 8 || !/^\d+$/.test(nim)) {
-                return res.status(400).json({
-                    message: "NIM minimal 8 digit angka",
-                });
-            }
-
             const existingUserByName = await userRepository.findByName(name);
             if (existingUserByName) {
                 return res.status(409).json({
@@ -69,12 +45,6 @@ class AuthController {
     async login(req, res) {
         try {
             const { name, password } = req.body;
-
-            if (!name || !password) {
-                return res.status(400).json({
-                    message: "Username dan password wajib diisi",
-                });
-            }
 
             const user = await userRepository.findByCredentials(name, password);
 

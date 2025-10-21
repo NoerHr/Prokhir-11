@@ -8,12 +8,6 @@ class ClaimController {
         try {
             const { itemId, userId, alasan } = req.body;
 
-            if (!itemId || !userId || !alasan) {
-                return res.status(400).json({
-                    message: "Data tidak lengkap",
-                });
-            }
-
             const barang = await barangRepository.findById(itemId);
             if (!barang) {
                 return res.status(404).json({
@@ -123,12 +117,6 @@ class ClaimController {
             const { id } = req.params;
             const { status, adminNote } = req.body;
 
-            if (!status || !["Approved", "Rejected"].includes(status)) {
-                return res.status(400).json({
-                    message: "Status tidak valid. Gunakan 'Approved' atau 'Rejected'",
-                });
-            }
-
             const claim = await claimRepository.findById(id);
             if (!claim) {
                 return res.status(404).json({
@@ -145,7 +133,7 @@ class ClaimController {
             const updatedClaim = await claimRepository.update(id, updateData);
 
             res.status(200).json({
-                message: `Pengajuan berhasil ${status === "Approved" ? "disetujui" : "ditolak"}`,
+                message: `Pengajuan berhasil ${status === "APPROVED" ? "disetujui" : "ditolak"}`,
                 data: updatedClaim,
             });
         } catch (error) {
