@@ -1,4 +1,5 @@
 const userRepository = require("../repositories/userRepository");
+const { generateToken } = require("../config/jwt");
 
 class AuthController {
     async register(req, res) {
@@ -30,9 +31,18 @@ class AuthController {
             const newUser = await userRepository.create(userData);
             const { password: _, ...userWithoutPassword } = newUser;
 
+            const token = generateToken({
+                id: newUser.id,
+                name: newUser.name,
+                nim: newUser.nim,
+                email: newUser.email,
+                role: newUser.role,
+            });
+
             res.status(201).json({
                 message: "Registrasi berhasil",
                 user: { ...userWithoutPassword, role: "user" },
+                token,
             });
         } catch (error) {
             res.status(500).json({
@@ -50,9 +60,18 @@ class AuthController {
 
             if (user) {
                 const { password: _, ...userWithoutPassword } = user;
+                const token = generateToken({
+                    id: user.id,
+                    name: user.name,
+                    nim: user.nim,
+                    email: user.email,
+                    role: user.role,
+                });
+
                 return res.status(200).json({
                     message: "Login berhasil",
                     user: { ...userWithoutPassword, role: "admin" },
+                    token,
                 });
             }
 
@@ -60,9 +79,18 @@ class AuthController {
 
             if (registeredUser) {
                 const { password: _, ...userWithoutPassword } = registeredUser;
+                const token = generateToken({
+                    id: registeredUser.id,
+                    name: registeredUser.name,
+                    nim: registeredUser.nim,
+                    email: registeredUser.email,
+                    role: registeredUser.role,
+                });
+
                 return res.status(200).json({
                     message: "Login berhasil",
                     user: { ...userWithoutPassword, role: "user" },
+                    token,
                 });
             }
 

@@ -15,6 +15,7 @@ export type Claimer = {
 export type categoryItem = {
   id: number;
   name: string;
+  status?: boolean;
 };
 
 export type Item = {
@@ -49,7 +50,7 @@ export type ClaimRequest = {
   userNim: string;
   alasan: string;
   buktiUrl: string | null;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "PENDING" | "APPROVED" | "REJECTED";
   adminNote: string | null;
   createdAt: string;
   processedAt?: string;

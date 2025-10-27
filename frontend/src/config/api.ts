@@ -13,6 +13,22 @@ export const api = axios.create({
   timeout: 30000, // 30 seconds
 });
 
+api.interceptors.request.use(
+  (config) => {
+    const authData = localStorage.getItem("authToken");
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed.token) {
+        config.headers.Authorization = `Bearer ${parsed.token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // API Endpoints - Centralized endpoint constants
 export const API_ENDPOINTS = {
   // Authentication

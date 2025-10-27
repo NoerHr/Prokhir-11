@@ -23,7 +23,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem("authToken", JSON.stringify(response.data.user));
+        const authData = {
+          ...response.data.user,
+          token: response.data.token,
+        };
+        localStorage.setItem("authToken", JSON.stringify(authData));
         onLoginSuccess();
       }
     } catch (err: any) {

@@ -24,7 +24,9 @@ export const DaftarBarang: React.FC<DaftarBarangProps> = ({
         categoryMap.set(item.kategoriBarang.id, item.kategoriBarang);
       }
     });
-    return Array.from(categoryMap.values());
+    const allCategories = Array.from(categoryMap.values());
+    
+    return allCategories.filter((cat: any) => cat.status !== false);
   }, [items]);
 
   const filteredItems = useMemo(() => {

@@ -55,6 +55,9 @@ model Barang {
   categoryId     Int           @map("category_id")
   status         BarangStatus  @default(DITEMUKAN)
   claimedDate    DateTime?     @map("claimed_date")
+  claimerName    String?       @map("claimer_name")
+  claimerNim     String?       @map("claimer_nim")
+  claimerPhotoUrl String?      @map("claimer_photo_url")
   createdAt      DateTime      @default(now()) @map("created_at")
 
   // Relations

@@ -76,7 +76,11 @@ export const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
       });
 
       if (response.status === 201) {
-        localStorage.setItem("authToken", JSON.stringify(response.data.user));
+        const authData = {
+          ...response.data.user,
+          token: response.data.token,
+        };
+        localStorage.setItem("authToken", JSON.stringify(authData));
         toast.success("Registrasi berhasil! Selamat datang.");
         onRegisterSuccess();
       }

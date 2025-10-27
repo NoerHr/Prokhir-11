@@ -140,7 +140,22 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
 
   const categories = useMemo(() => {
     const allCategories = foundItems.map((item) => item.kategoriBarang.name);
-    return ["Semua", ...new Set(allCategories)];
+    const uniqueCategories = [...new Set(allCategories)];
+    
+    const categoryObjects = foundItems.reduce((acc, item) => {
+      const catName = item.kategoriBarang.name;
+      if (!acc.has(catName)) {
+        acc.set(catName, item.kategoriBarang);
+      }
+      return acc;
+    }, new Map());
+
+    const activeCategories = uniqueCategories.filter(catName => {
+      const catObj = categoryObjects.get(catName);
+      return catObj && catObj.status !== false;
+    });
+
+    return ["Semua", ...activeCategories];
   }, [foundItems]);
 
   const filteredItems = useMemo(() => {
@@ -360,60 +375,90 @@ export const DashboardUserLoggedIn: React.FC<DashboardUserLoggedInProps> = ({
                         <h3 className="font-bold text-lg">{request.itemName}</h3>
                         <p className="text-sm text-gray-600 mt-1">{request.alasan}</p>
                         <p className="text-xs text-gray-400 mt-2">
-                          Diajukan: {new Date(request.createdAt).toLocaleDateString("id-ID")}
+                          Diajukan: {new Date(request.createdAt).toLocaleDateString("id-ID", { 
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                         </p>
                         {request.adminNote && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded">
+                          <div className="mt-3 p-3 bg-gray-50 rounded border border-gray-200">
                             <p className="text-xs text-gray-500 font-semibold">Catatan Admin:</p>
-                            <p className="text-sm text-gray-700">{request.adminNote}</p>
+                            <p className="text-sm text-gray-700 mt-1">{request.adminNote}</p>
                           </div>
                         )}
                         
-                        {/* Info status Approved */}
-                        {request.status === "Approved" && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
-                            <p className="text-sm text-green-800 font-semibold">
-                              ✓ Pengajuan Disetujui
+                        {request.status === "APPROVED" && (
+                          <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-sm text-green-800 font-semibold flex items-center gap-2">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                              </svg>
+                              Pengajuan Disetujui
                             </p>
-                            <p className="text-xs text-green-700 mt-1">
-                              Silakan hubungi admin untuk mengambil barang. 
-                              Bawa identitas (KTM) dan bukti kepemilikan saat pengambilan.
+                            <p className="text-xs text-green-700 mt-2 leading-relaxed">
+                              Silakan hubungi admin atau datang ke kantor Lost & Found untuk mengambil barang. 
+                              <br />
+                              <strong>Jangan lupa bawa:</strong>
+                            </p>
+                            <ul className="text-xs text-green-700 mt-1 ml-4 list-disc">
+                              <li>Kartu Tanda Mahasiswa (KTM)</li>
+                              <li>Bukti kepemilikan (jika ada)</li>
+                            </ul>
+                          </div>
+                        )}
+
+                        {request.status === "REJECTED" && (
+                          <div className="mt-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-sm text-red-800 font-semibold flex items-center gap-2">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                              </svg>
+                              Pengajuan Ditolak
+                            </p>
+                            <p className="text-xs text-red-700 mt-2">
+                              {request.adminNote 
+                                ? "Silakan periksa catatan admin di atas untuk informasi lebih lanjut." 
+                                : "Barang tidak sesuai dengan deskripsi atau bukti yang diberikan."}
                             </p>
                           </div>
                         )}
 
-                        {/* Info status Rejected */}
-                        {request.status === "Rejected" && request.adminNote && (
-                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                            <p className="text-sm text-red-800 font-semibold">
-                              ✗ Pengajuan Ditolak
+                        {request.status === "PENDING" && (
+                          <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p className="text-sm text-yellow-800 font-semibold flex items-center gap-2">
+                              <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                              </svg>
+                              Menunggu Verifikasi Admin
                             </p>
-                            <p className="text-xs text-red-700 mt-1">
-                              Silakan periksa catatan admin di atas untuk informasi lebih lanjut.
+                            <p className="text-xs text-yellow-700 mt-2">
+                              Pengajuan Anda sedang dalam proses review. Kami akan menghubungi Anda segera.
                             </p>
                           </div>
                         )}
 
-                        {/* Tombol Hapus */}
                         <button
                           onClick={() => handleDeleteClick(request.id)}
-                          className="mt-3 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                          className="mt-3 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
                         >
                           Hapus Pengajuan
                         </button>
                       </div>
                       <span
                         className={`ml-4 px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
-                          request.status === "Pending"
+                          request.status === "PENDING"
                             ? "bg-yellow-100 text-yellow-800"
-                            : request.status === "Approved"
+                            : request.status === "APPROVED"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {request.status === "Pending" && "Menunggu"}
-                        {request.status === "Approved" && "Disetujui"}
-                        {request.status === "Rejected" && "Ditolak"}
+                        {request.status === "PENDING" && "Menunggu"}
+                        {request.status === "APPROVED" && "Disetujui"}
+                        {request.status === "REJECTED" && "Ditolak"}
                       </span>
                     </div>
                   </div>

@@ -15,9 +15,14 @@ const validate = (schema) =>
     // Jika lolos, lanjut ke controller
     return next();
   } catch (error) {
+    console.error('❌ Validation Error:', error.errors);
     // Jika gagal, kirim error 400 (Bad Request)
     // error.errors berisi pesan yang jelas dari Zod
-    return res.status(400).json(error.errors);
+    return res.status(400).json({
+      success: false,
+      message: 'Validasi data gagal',
+      errors: error.errors,
+    });
   }
 };
 

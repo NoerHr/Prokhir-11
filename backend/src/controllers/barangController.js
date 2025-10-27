@@ -18,6 +18,7 @@ class BarangController {
         kategoriBarang: {
           id: row.category.id,
           name: row.category.name,
+          status: row.category.status,
         },
         finder: {
           name: row.finderName,
@@ -25,12 +26,12 @@ class BarangController {
           contact: row.finderContact,
           photoUrl: row.finderPhotoUrl,
         },
-        claimer: row.claimer_name
+        claimer: row.claimedDate
           ? {
-              name: row.claimer_name,
-              nim: row.claimer_nim,
-              claimedDate: row.claimed_date,
-              photoUrl: row.claimer_photo_url,
+              name: row.claimerName,
+              nim: row.claimerNim,
+              claimedDate: row.claimedDate,
+              photoUrl: row.claimerPhotoUrl,
             }
           : null,
         createdAt: row.createdAt,
@@ -43,6 +44,51 @@ class BarangController {
     } catch (error) {
       res.status(500).json({
         message: "Terjadi kesalahan saat mengambil data barang",
+        error: error.message,
+      });
+    }
+  }
+
+  async getBarangById(req, res) {
+    try {
+      const { id } = req.params;
+
+      const barang = await barangRepository.findById(id);
+      if (!barang) {
+        return res.status(404).json({
+          message: "Barang tidak ditemukan",
+        });
+      }
+
+      const responseData = {
+        id: barang.id,
+        name: barang.name,
+        description: barang.description,
+        foundDate: barang.foundDate,
+        status: barang.status,
+        imageUrl: barang.imageUrl,
+        location: barang.location,
+        kategoriBarang: {
+          id: barang.category.id,
+          name: barang.category.name,
+        },
+        finder: {
+          name: barang.finderName,
+          nim: barang.finderNim,
+          contact: barang.finderContact,
+          photoUrl: barang.finderPhotoUrl,
+        },
+        claimRequests: barang.claimRequests || [],
+        createdAt: barang.createdAt,
+      };
+
+      res.status(200).json({
+        message: "Berhasil mendapatkan detail barang",
+        data: responseData,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Terjadi kesalahan saat mengambil detail barang",
         error: error.message,
       });
     }
@@ -62,8 +108,18 @@ class BarangController {
         location,
       } = req.body;
 
-      const itemPhotoFile = req.files.itemPhoto[0];
-      const finderPhotoFile = req.files.finderPhoto[0];
+      // Manual validation
+      if (!name || !description || !category || !finderName || !finderNim || !foundDate || !foundTime || !location) {
+        return res.status(400).json({
+          message: "Semua field wajib diisi",
+        });
+      }
+
+      if (!req.files || !req.files.itemPhoto || !req.files.finderPhoto) {
+        return res.status(400).json({
+          message: "Foto barang dan foto penemu wajib diupload",
+        });
+      }
 
       const kategori = await kategoriRepository.findById(category);
       if (!kategori) {
@@ -84,7 +140,7 @@ class BarangController {
         `finder-${Date.now()}`
       );
 
-      const foundDateTime = `${foundDate} ${foundTime}:00+07`;
+      const foundDateTime = `${foundDate}T${foundTime}:00+07:00`;
 
       const barangData = {
         name,
@@ -105,19 +161,19 @@ class BarangController {
         id: newBarang.id,
         name: newBarang.name,
         description: newBarang.description,
-        foundDate: newBarang.found_date,
+        foundDate: newBarang.foundDate,
         status: newBarang.status,
-        imageUrl: newBarang.image_url,
+        imageUrl: newBarang.imageUrl,
         location: newBarang.location,
         kategoriBarang: {
           id: kategori.id,
           name: kategori.name,
         },
         finder: {
-          name: newBarang.finder_name,
-          nim: newBarang.finder_nim,
-          contact: newBarang.finder_contact,
-          photoUrl: newBarang.finder_photo_url,
+          name: newBarang.finderName,
+          nim: newBarang.finderNim,
+          contact: newBarang.finderContact,
+          photoUrl: newBarang.finderPhotoUrl,
         },
       };
 

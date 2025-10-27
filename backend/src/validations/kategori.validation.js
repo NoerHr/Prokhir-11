@@ -6,9 +6,6 @@ const createKategoriSchema = z.object({
     name: z.string({ required_error: 'Nama kategori tidak boleh kosong' })
       .min(3, 'Nama kategori minimal 3 karakter'),
       
-    description: z.string({ required_error: 'Deskripsi tidak boleh kosong' })
-      .min(5, 'Deskripsi minimal 5 karakter'), // Tambahkan minimal panjang jika perlu
-      
     // Status bisa string 'true'/'false' atau boolean, kita ubah jadi boolean
     status: z.preprocess((val) => {
       if (typeof val === 'string') return val === 'true';

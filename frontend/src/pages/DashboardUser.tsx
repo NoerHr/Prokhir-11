@@ -26,7 +26,22 @@ export const DashboardUser: React.FC<DashboardUserProps> = ({ items }) => {
     // Ambil daftar kategori unik dari data barang untuk pilihan filter
     const categories = useMemo(() => {
         const allCategories = foundItems.map(item => item.kategoriBarang.name);
-        return ['Semua', ...new Set(allCategories)]; // Tambahkan 'Semua' di awal
+        const uniqueCategories = [...new Set(allCategories)];
+        
+        const categoryObjects = foundItems.reduce((acc, item) => {
+          const catName = item.kategoriBarang.name;
+          if (!acc.has(catName)) {
+            acc.set(catName, item.kategoriBarang);
+          }
+          return acc;
+        }, new Map());
+
+        const activeCategories = uniqueCategories.filter(catName => {
+          const catObj = categoryObjects.get(catName);
+          return catObj && catObj.status !== false;
+        });
+
+        return ['Semua', ...activeCategories];
     }, [foundItems]);
 
     // 2. Logika untuk memfilter barang berdasarkan search dan kategori

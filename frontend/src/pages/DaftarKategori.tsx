@@ -63,15 +63,15 @@ export const DaftarKategori = () => {
     currentStatus: boolean
   ) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:2006/update-kategori-status/${categoryId}`,
+      const response = await api.patch(
+        API_ENDPOINTS.CATEGORIES.UPDATE_STATUS(categoryId),
         { status: !currentStatus }
       );
       toast.success(response.data?.message);
-      await fetchCategories(); // Refresh data
-    } catch (error) {
+      await fetchCategories();
+    } catch (error: any) {
       console.log(error);
-      toast.error("Gagal mengubah status kategori.");
+      toast.error(error.response?.data?.message || "Gagal mengubah status kategori.");
     }
   };
 

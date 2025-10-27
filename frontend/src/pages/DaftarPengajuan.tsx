@@ -34,7 +34,7 @@ export const DaftarPengajuan = () => {
 
   const filteredRequests = claimRequests.filter((req) => {
     if (filter === "All") return true;
-    return req.status.toUpperCase() === filter.toUpperCase();
+    return req.status === filter;
   });
 
   const handleUpdateStatus = async (
@@ -90,11 +90,11 @@ export const DaftarPengajuan = () => {
 
   const getStatusBadge = (status: string) => {
     const badges = {
-    Pending: "bg-yellow-100 text-yellow-800",
-    Aproved: "bg-green-100 text-green-800",
-    Rejected: "bg-red-100 text-red-800",
+      PENDING: "bg-yellow-100 text-yellow-800",
+      APPROVED: "bg-green-100 text-green-800",
+      REJECTED: "bg-red-100 text-red-800",
     };
-    return badges[status.toUpperCase() as keyof typeof badges] || "bg-gray-100 text-gray-800";
+    return badges[status as keyof typeof badges] || "bg-gray-100 text-gray-800";
   };
 
   if (isLoading) {
@@ -126,17 +126,11 @@ export const DaftarPengajuan = () => {
             {status}
             {status === "All" && ` (${claimRequests.length})`}
             {status === "PENDING" &&
-              ` (${
-            claimRequests.filter((r) => r.status.toUpperCase() === "PENDING").length // <-- Pakai toUpperCase()
-            })`}
+              ` (${claimRequests.filter((r) => r.status === "PENDING").length})`}
             {status === "APPROVED" &&
-              ` (${
-              claimRequests.filter((r) => r.status.toUpperCase() === "APPROVED").length // <-- Pakai toUpperCase()
-           })`}
+              ` (${claimRequests.filter((r) => r.status === "APPROVED").length})`}
             {status === "REJECTED" &&
-              ` (${
-              claimRequests.filter((r) => r.status.toUpperCase() === "REJECTED").length // <-- Pakai toUpperCase()
-           })`}
+              ` (${claimRequests.filter((r) => r.status === "REJECTED").length})`}
           </button>
         ))}
       </div>
@@ -272,7 +266,7 @@ export const DaftarPengajuan = () => {
                 )}
               </div>
 
-              {selectedClaim.status.toUpperCase() === "PENDING" && (
+              {selectedClaim.status === "PENDING" && (
                     <div className="mt-6 space-y-4">
                       <div>
                         <label className="block text-sm font-medium mb-1">
@@ -311,7 +305,7 @@ export const DaftarPengajuan = () => {
                     </div>
                   )}
 
-              {selectedClaim.status.toUpperCase() === "APPROVED" && (
+              {selectedClaim.status === "APPROVED" && (
                 <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-green-800 font-medium">
                     ✓ Pengajuan telah disetujui
@@ -324,7 +318,7 @@ export const DaftarPengajuan = () => {
                 </div>
               )}
 
-              {selectedClaim.status.toUpperCase() === "REJECTED" && (
+              {selectedClaim.status === "REJECTED" && (
                 <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-800 font-medium">
                     ✗ Pengajuan telah ditolak

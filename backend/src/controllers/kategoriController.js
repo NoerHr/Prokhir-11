@@ -18,12 +18,11 @@ class KategoriController {
 
     async createKategori(req, res) {
         try {
-            const { name, description, status } = req.body;
+            const { name, status } = req.body;
 
             const kategoriData = {
                 name,
-                description,
-                status: statusBoolean,
+                status,
             };
 
             const newKategori = await kategoriRepository.create(kategoriData);
@@ -53,7 +52,7 @@ class KategoriController {
                 });
             }
 
-            const updated = await kategoriRepository.updateStatus(id, statusBoolean);
+            const updated = await kategoriRepository.updateStatus(id, status);
 
             if (updated) {
                 res.status(200).json({

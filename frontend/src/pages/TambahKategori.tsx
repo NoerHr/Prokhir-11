@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { api, API_ENDPOINTS } from "../config/api";
 
 export const TambahKategori = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,21 +16,13 @@ export const TambahKategori = () => {
       const formData = new FormData(e.currentTarget);
       const kategoriData = {
         name: formData.get("name"),
-        description: formData.get("description"),
-        status: formData.get("status") === "true", // Convert string to boolean
+        status: formData.get("status") === "true",
       };
 
-      console.log("Sending data:", kategoriData);
-
-      const response = await axios.post(
-        "http://localhost:2006/create-kategori",
-        kategoriData,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+      const response = await api.post(
+        API_ENDPOINTS.CATEGORIES.CREATE,
+        kategoriData
       );
-
-      console.log("Response:", response);
 
       if (response.status === 201) {
         toast.success(response.data.message);
@@ -40,11 +32,19 @@ export const TambahKategori = () => {
         return navigate("/admin/daftar-kategori");
       }
     } catch (error: any) {
-      console.error("Error details:", error.response?.data || error);
-      toast.error(
-        error.response?.data?.message ||
-          "Terjadi kesalahan saat menambahkan kategori."
-      );
+      console.error("Error details:", error.response?.data);
+
+      if (error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        validationErrors.forEach((err: any) => {
+          toast.error(`${err.path?.[1] || "Field"}: ${err.message}`);
+        });
+      } else {
+        toast.error(
+          error.response?.data?.message ||
+            "Terjadi kesalahan saat menambahkan kategori."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -62,12 +62,12 @@ export const TambahKategori = () => {
       >
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-2xl font-bold text-gray-800 mb-6">
-            1. Informasi Kategori
+            Informasi Kategori
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label
-                htmlFor="nama-barang"
+                htmlFor="nama-kategori"
                 className="block text-sm font-medium text-gray-600 mb-1"
               >
                 Nama Kategori <span className="text-red-500">*</span>
@@ -78,6 +78,7 @@ export const TambahKategori = () => {
                 id="nama-kategori"
                 required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Contoh: Elektronik"
               />
             </div>
             <div>
@@ -93,24 +94,9 @@ export const TambahKategori = () => {
                 required
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value={"true"}>Aktif</option>
-                <option value={"false"}>Non-Aktif</option>
+                <option value="true">Aktif</option>
+                <option value="false">Non-Aktif</option>
               </select>
-            </div>
-            <div className="md:col-span-2">
-              <label
-                htmlFor="deskripsi"
-                className="block text-sm font-medium text-gray-600 mb-1"
-              >
-                Deskripsi <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
-                id="deskripsi"
-                required
-                rows={3}
-                className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-              ></textarea>
             </div>
           </div>
         </div>

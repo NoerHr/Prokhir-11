@@ -117,20 +117,14 @@ function App() {
   };
 
   const handleDeleteItem = async (itemId: number) => {
-    if (
-      window.confirm(
-        "Apakah Anda yakin ingin menghapus barang ini secara permanen? Tindakan ini tidak dapat diurungkan."
-      )
-    ) {
-      try {
-        const response = await api.delete(API_ENDPOINTS.ITEMS.DELETE(itemId));
-        toast.success(response.data?.message);
-        await fetchItems();
-        return navigate("/admin/daftar-barang");
-      } catch (error) {
-        console.log(error);
-        toast.error("Gagal menghapus barang.");
-      }
+    try {
+      const response = await api.delete(API_ENDPOINTS.ITEMS.DELETE(itemId));
+      toast.success(response.data?.message);
+      await fetchItems();
+      return navigate("/admin/daftar-barang");
+    } catch (error) {
+      console.log(error);
+      toast.error("Gagal menghapus barang.");
     }
   };
 

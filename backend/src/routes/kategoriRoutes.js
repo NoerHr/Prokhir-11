@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const kategoriController = require("../controllers/kategoriController.js");
-
-// Import middleware validate dan skema Zod pakai require
-const validate = require('../middlewares/validate.js'); // Pastikan validate.js pakai module.exports
+const kategoriController = require("../controllers/kategoriController");
+const { authenticate, isAdmin } = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
 const {
   createKategoriSchema,
   updateKategoriStatusSchema,
-  deleteKategoriSchema
-} = require('../validations/kategori.validation.js'); // Pastikan kategori.validation.js pakai module.exports
+  deleteKategoriSchema,
+} = require("../validations/kategori.validation");
 
 /**
  * Rute API untuk Kategori Barang
@@ -20,21 +19,27 @@ router.get("/", kategoriController.getAllKategori);
 // POST /categories - Buat kategori baru
 router.post(
   "/",
-  validate(createKategoriSchema), // Jalankan validasi Zod dulu
-  kategoriController.createKategori // Baru jalankan controller
+  authenticate,
+  isAdmin,
+  validate(createKategoriSchema),
+  kategoriController.createKategori
 );
 
 // PATCH /categories/:id/status - Update status kategori
 router.patch(
   "/:id/status",
-  validate(updateKategoriStatusSchema), // Validasi ID di params dan status di body
+  authenticate,
+  isAdmin,
+  validate(updateKategoriStatusSchema),
   kategoriController.updateKategoriStatus
 );
 
 // DELETE /categories/:id - Hapus kategori
 router.delete(
   "/:id",
-  validate(deleteKategoriSchema), // Validasi ID di params
+  authenticate,
+  isAdmin,
+  validate(deleteKategoriSchema),
   kategoriController.deleteKategori
 );
 

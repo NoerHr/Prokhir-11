@@ -8,6 +8,24 @@ class ClaimController {
         try {
             const { itemId, userId, alasan } = req.body;
 
+            if (!itemId || !userId || !alasan) {
+                return res.status(400).json({
+                    message: "Field itemId, userId, dan alasan wajib diisi",
+                });
+            }
+
+            if (alasan.length < 10) {
+                return res.status(400).json({
+                    message: "Alasan pengajuan minimal 10 karakter",
+                });
+            }
+
+            if (alasan.length > 500) {
+                return res.status(400).json({
+                    message: "Alasan pengajuan maksimal 500 karakter",
+                });
+            }
+
             const barang = await barangRepository.findById(itemId);
             if (!barang) {
                 return res.status(404).json({
@@ -15,20 +33,9 @@ class ClaimController {
                 });
             }
 
-            if (barang.status === "Diambil") {
+            if (barang.status === "DIAMBIL") {
                 return res.status(400).json({
                     message: "Barang sudah diambil",
-                });
-            }
-
-            const existingClaims = await claimRepository.findByItemId(itemId);
-            const userHasPendingClaim = existingClaims.some(
-                (claim) => claim.user_id === parseInt(userId) && claim.status === "Pending"
-            );
-
-            if (userHasPendingClaim) {
-                return res.status(400).json({
-                    message: "Anda sudah mengajukan klaim untuk barang ini",
                 });
             }
 
@@ -39,11 +46,21 @@ class ClaimController {
                 });
             }
 
+            const existingClaims = await claimRepository.findByItemId(itemId);
+            const userHasPendingClaim = existingClaims.some(
+                (claim) => claim.userId === user.id && claim.status === "PENDING"
+            );
+
+            if (userHasPendingClaim) {
+                return res.status(400).json({
+                    message: "Anda sudah mengajukan klaim untuk barang ini",
+                });
+            }
+
             let buktiUrl = null;
             if (req.file) {
-                const buktiBuffer = req.file.buffer;
                 buktiUrl = await uploadToCloudinary(
-                    buktiBuffer,
+                    req.file.buffer,
                     "lost-and-found/bukti",
                     `bukti-${Date.now()}`
                 );
@@ -116,6 +133,12 @@ class ClaimController {
         try {
             const { id } = req.params;
             const { status, adminNote } = req.body;
+
+            if (!status || !["APPROVED", "REJECTED"].includes(status)) {
+                return res.status(400).json({
+                    message: "Status harus APPROVED atau REJECTED",
+                });
+            }
 
             const claim = await claimRepository.findById(id);
             if (!claim) {

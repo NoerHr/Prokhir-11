@@ -1,4 +1,4 @@
-const { z } = require('zod'); // Pakai require
+const { z } = require('zod');
 
 // Skema untuk membuat pengajuan klaim (POST /claims)
 const createClaimSchema = z.object({
@@ -9,8 +9,7 @@ const createClaimSchema = z.object({
 
     // userId (NIM) datang sebagai string dari FormData
     userId: z.string({ required_error: 'NIM pengguna tidak boleh kosong' })
-      .min(8, 'NIM pengguna minimal 8 digit') // Samakan dengan skema user
-      .regex(/^[0-9]+$/, 'NIM pengguna harus berupa angka'), // Samakan dengan skema user
+      .min(8, 'NIM pengguna minimal 8 digit'),
 
     alasan: z.string({ required_error: 'Alasan pengajuan tidak boleh kosong' })
       .min(10, 'Alasan pengajuan terlalu pendek (minimal 10 karakter)')
@@ -24,8 +23,7 @@ const getUserClaimsSchema = z.object({
   params: z.object({
     // userId (NIM) di URL
     userId: z.string({ required_error: 'NIM pengguna di URL tidak boleh kosong' })
-      .min(8, 'NIM pengguna di URL minimal 8 digit')
-      .regex(/^[0-9]+$/, 'NIM pengguna di URL harus berupa angka'),
+      .min(8, 'NIM pengguna di URL minimal 8 digit'),
   }),
 });
 

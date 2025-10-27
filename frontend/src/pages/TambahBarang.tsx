@@ -42,7 +42,6 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
 
     const formData = new FormData(e.currentTarget);
 
-    // Validasi file upload
     if (!itemPhoto || !finderPhoto) {
       toast.error("Harap unggah foto barang dan foto penemu.");
       setIsLoading(false);
@@ -63,11 +62,19 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
         navigate("/admin/daftar-barang");
       }
     } catch (error: any) {
-      console.error("Error details:", error.response?.data || error.message);
-      toast.error(
-        error.response?.data?.message ||
-          "Terjadi kesalahan saat menambahkan barang."
-      );
+      console.error("Error details:", error.response?.data);
+
+      if (error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        validationErrors.forEach((err: any) => {
+          toast.error(`${err.path?.[1] || "Field"}: ${err.message}`);
+        });
+      } else {
+        toast.error(
+          error.response?.data?.message ||
+            "Terjadi kesalahan saat menambahkan barang."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +198,6 @@ export const TambahBarang: React.FC<TambahBarangProps> = ({ onAddItem }) => {
                 type="text"
                 id="nim-penemu"
                 required
-                pattern="\d{8,}"
                 className="w-full p-2 bg-gray-50 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="12345678"
               />

@@ -77,10 +77,13 @@ class BarangRepository {
     return await prisma.barang.update({
       where: { id: parseInt(id) },
       data: {
-        status: "DIAMBIL",
+        status: data.status === "Diambil" ? "DIAMBIL" : data.status,
         claimedDate: data.claimed_date
           ? new Date(data.claimed_date)
           : undefined,
+        claimerName: data.claimer_name,
+        claimerNim: data.claimer_nim,
+        claimerPhotoUrl: data.claimer_photo_url,
       },
       include: {
         category: true,

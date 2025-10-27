@@ -16,8 +16,7 @@ const createBarangSchema = z.object({
     finderName: z.string({ required_error: 'Nama penemu tidak boleh kosong' }),
     
     finderNim: z.string({ required_error: 'NIM penemu tidak boleh kosong' })
-      .min(8, 'NIM penemu minimal 8 digit')
-      .regex(/^[0-9]+$/, 'NIM penemu harus berupa angka'),
+      .min(8, 'NIM penemu minimal 8 digit'),
       
     finderContact: z.string().optional(), // Kontak penemu boleh kosong
     
@@ -43,7 +42,6 @@ const claimBarangSchema = z.object({
     name: z.string({ required_error: 'Nama penerima tidak boleh kosong' }),
     nim: z.string({ required_error: 'NIM penerima tidak boleh kosong' })
       .min(8, 'NIM penerima minimal 8 digit')
-      .regex(/^[0-9]+$/, 'NIM penerima harus berupa angka'),
   }),
   // Note: Validasi file (claimerPhoto) dilakukan oleh Multer
 });
